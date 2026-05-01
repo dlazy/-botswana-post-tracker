@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BotswanaPost — Parcel Tracking System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0c07;
+    --bg2: #1a1509;
+    --bg3: #231d0c;
+    --bg4: #2d2510;
+    --gold: #D4A832;
+    --gold-light: #f0c84a;
+    --gold-dim: #8a6a14;
+    --coral: #C4663A;
+    --coral-light: #e08055;
+    --cream: #F5EDD4;
+    --cream-dim: #b5aa8a;
+    --text: #F5EDD4;
+    --text-dim: #9a8f71;
+    --text-muted: #5a5240;
+    --border: rgba(212,168,50,0.15);
+    --border-strong: rgba(212,168,50,0.35);
+    --success: #4a9e6a;
+    --error: #c44040;
+    --info: #4a7ec4;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Geometric background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(212,168,50,0.025) 40px, rgba(212,168,50,0.025) 41px),
+      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(212,168,50,0.025) 40px, rgba(212,168,50,0.025) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,12,7,0.95);
+    backdrop-filter: blur(12px);
+  }
+
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-mark {
+    width: 40px;
+    height: 40px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--bg);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+  }
+
+  .logo-text span {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .uptime-badge {
+    font-size: 11px;
+    color: var(--success);
+    background: rgba(74,158,106,0.12);
+    border: 1px solid rgba(74,158,106,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 56px 0 40px;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 480px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 32px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .tab-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 28px;
+    border: none;
+    border-radius: calc(var(--radius) - 2px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: transparent;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+  }
+
+  .tab-btn.active {
+    background: var(--gold);
+    color: var(--bg);
+    box-shadow: 0 2px 12px rgba(212,168,50,0.3);
+  }
+
+  .tab-btn:hover:not(.active) {
+    background: var(--bg3);
+    color: var(--cream);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.35s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* TRACKING INPUT */
+  .track-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 0;
+  }
+
+  .track-input-wrap { flex: 1; position: relative; }
+
+  .track-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 14px 20px 14px 48px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .track-input::placeholder { color: var(--text-muted); letter-spacing: 0.5px; font-family: 'DM Sans', sans-serif; font-size: 14px; }
+  .track-input:focus { border-color: var(--gold); }
+
+  .track-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold-dim);
+    font-size: 18px;
+    pointer-events: none;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(212,168,50,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(212,168,50,0.08); }
+
+  /* DEMO NUMBERS */
+  .demo-numbers {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .demo-label { font-size: 12px; color: var(--text-muted); }
+
+  .demo-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    background: rgba(212,168,50,0.08);
+    border: 1px solid rgba(212,168,50,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .demo-pill:hover { background: rgba(212,168,50,0.15); }
+
+  /* TRACKING RESULT */
+  #tracking-result { margin-top: 24px; }
+
+  .parcel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .parcel-meta h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+
+  .parcel-meta p { font-size: 13px; color: var(--text-dim); }
+
+  .status-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .status-transit { background: rgba(212,168,50,0.15); color: var(--gold); border: 1px solid rgba(212,168,50,0.3); }
+  .status-delivered { background: rgba(74,158,106,0.15); color: #5ec882; border: 1px solid rgba(74,158,106,0.3); }
+  .status-pending { background: rgba(74,126,196,0.15); color: #6e9de0; border: 1px solid rgba(74,126,196,0.3); }
+  .status-exception { background: rgba(196,64,64,0.15); color: #e06060; border: 1px solid rgba(196,64,64,0.3); }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .info-cell {
+    background: var(--bg3);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+
+  .info-cell label { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .info-cell p { font-size: 14px; color: var(--cream); font-weight: 500; }
+
+  /* TIMELINE */
+  .timeline-title {
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .timeline { list-style: none; }
+
+  .timeline-item {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 24px;
+    position: relative;
+  }
+
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .timeline-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 24px;
+  }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg4);
+    border: 2px solid var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .timeline-item.current .timeline-dot {
+    background: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(212,168,50,0.2);
+    width: 14px;
+    height: 14px;
+  }
+
+  .timeline-item.done .timeline-dot {
+    background: var(--success);
+    border-color: var(--success);
+  }
+
+  .timeline-line {
+    flex: 1;
+    width: 1px;
+    background: var(--border);
+    margin-top: 4px;
+  }
+
+  .timeline-item:last-child .timeline-line { display: none; }
+
+  .timeline-content { flex: 1; }
+  .timeline-event { font-size: 14px; color: var(--cream); font-weight: 500; }
+  .timeline-loc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .timeline-time { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-top: 4px; }
+
+  /* STAFF PORTAL */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+
+  .form-field { display: flex; flex-direction: column; gap: 8px; }
+
+  .form-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0.5px; }
+
+  .form-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus { border-color: var(--gold); }
+  .form-input::placeholder { color: var(--text-muted); }
+
+  select.form-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a14' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .form-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    grid-column: 1 / -1;
+  }
+
+  .generated-id {
+    background: rgba(212,168,50,0.08);
+    border: 1px dashed var(--gold-dim);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    right: 28px;
+    background: var(--bg2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--cream);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.success { border-left: 3px solid var(--success); }
+  #toast.error { border-left: 3px solid var(--error); }
+
+  /* AI ASSISTANT */
+  #ai-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 56px;
+    height: 56px;
+    background: var(--gold);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 24px rgba(212,168,50,0.4);
+    transition: all 0.25s;
+  }
+
+  #ai-fab:hover { transform: scale(1.08); background: var(--gold-light); }
+
+  #ai-panel {
+    position: fixed;
+    bottom: 96px;
+    right: 28px;
+    width: 360px;
+    max-height: 500px;
+    background: var(--bg2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  #ai-panel.open { display: flex; }
+
+  .ai-header {
+    padding: 16px 20px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ai-avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .ai-header-text { flex: 1; }
+  .ai-header-text h3 { font-size: 13px; font-weight: 600; color: var(--cream); }
+  .ai-header-text p { font-size: 11px; color: var(--text-dim); }
+
+  .ai-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 4px; }
+  .ai-close:hover { color: var(--cream); }
+
+  .ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg4) transparent;
+  }
+
+  .msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .msg.user {
+    background: rgba(212,168,50,0.12);
+    border: 1px solid rgba(212,168,50,0.2);
+    color: var(--cream);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg.ai {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg.ai.loading { color: var(--text-dim); }
+
+  .ai-input-row {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+
+  #ai-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--cream);
+    outline: none;
+    resize: none;
+  }
+
+  #ai-input:focus { border-color: var(--gold); }
+
+  #ai-send {
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  #ai-send:hover { background: var(--gold-light); }
+  #ai-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* LOGIN FORM */
+  .login-wrap {
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  /* SECTION DIVIDER */
+  .section-gap { height: 12px; }
+
+  /* STAFF LOGGED IN */
+  #staff-dashboard { display: none; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-card .stat-num { font-size: 28px; font-weight: 700; color: var(--gold); font-family: 'Playfair Display', serif; }
+  .stat-card .stat-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; letter-spacing: 0.5px; }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .track-form { flex-direction: column; }
+    #ai-panel { width: calc(100vw - 40px); right: 20px; }
+    .card { padding: 20px; }
+  }
+
+  /* SCROLL ANIMATION */
+  .fade-up { animation: fadeIn 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">BP</div>
+      <div class="logo-text">
+        BotswanaPost
+        <span>Parcel Tracking System</span>
+      </div>
+    </div>
+    <div class="uptime-badge">● System Online — 99.7% Uptime</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <h1>Track Every Parcel,<br><em>Every Step</em> of the Way</h1>
+    <p>Real-time parcel tracking across Botswana. From Gaborone to Maun, know exactly where your package is.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('customer')">📦 Customer Tracking</button>
+    <button class="tab-btn" onclick="switchTab('staff')">🔐 Staff Portal</button>
+  </div>
+
+  <!-- CUSTOMER TAB -->
+  <div class="tab-panel active" id="tab-customer">
+    <div class="card">
+      <div class="card-title">Track Your Parcel</div>
+      <div class="track-form">
+        <div class="track-input-wrap">
+          <span class="track-icon">⬡</span>
+          <input class="track-input" id="track-num" placeholder="Enter tracking number (e.g. BP-2025-00142)" maxlength="20" />
+        </div>
+        <button class="btn-primary" onclick="trackParcel()">Check Status →</button>
+      </div>
+      <div class="demo-numbers">
+        <span class="demo-label">Try demo:</span>
+        <span class="demo-pill" onclick="loadDemo('BP-2025-00142')">BP-2025-00142</span>
+        <span class="demo-pill" onclick="loadDemo('BP-2025-00089')">BP-2025-00089</span>
+        <span class="demo-pill" onclick="loadDemo('BP-2025-00211')">BP-2025-00211</span>
+      </div>
+    </div>
+
+    <div id="tracking-result"></div>
+  </div>
+
+  <!-- STAFF TAB -->
+  <div class="tab-panel" id="tab-staff">
+
+    <!-- LOGIN SECTION -->
+    <div id="staff-login">
+      <div class="card login-wrap">
+        <div class="card-title">Staff Authentication</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="form-field">
+            <label class="form-label">Username</label>
+            <input class="form-input" id="staff-user" placeholder="e.g. staff.gaborone" value="staff.gaborone" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="staff-pass" type="password" placeholder="••••••••" value="bpost123" />
+          </div>
+          <button class="btn-primary" style="margin-top:4px;" onclick="staffLogin()">Login to Portal →</button>
+          <p style="font-size:11px;color:var(--text-muted);text-align:center;">Demo credentials are pre-filled</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAFF DASHBOARD -->
+    <div id="staff-dashboard">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num">247</div><div class="stat-label">Active Parcels</div></div>
+        <div class="stat-card"><div class="stat-num">89</div><div class="stat-label">Delivered Today</div></div>
+        <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">In Exception</div></div>
+        <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Checkpoints</div></div>
+      </div>
+
+      <!-- REGISTER PARCEL -->
+      <div class="card">
+        <div class="card-title">Register New Parcel</div>
+        <div class="form-grid">
+          <div class="form-section-title">Sender Information</div>
+          <div class="form-field">
+            <label class="form-label">Sender Name</label>
+            <input class="form-input" id="reg-sender" placeholder="Full name" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Sender Location</label>
+            <select class="form-input" id="reg-from">
+              <option>Gaborone</option><option>Francistown</option><option>Maun</option>
+              <option>Kasane</option><option>Serowe</option><option>Lobatse</option>
+            </select>
+          </div>
+          <div class="form-section-title">Receiver Information</div>
+          <div class="form-field">
+            <label class="form-label">Receiver Name</label>
+            <input class="form-input" id="reg-receiver" placeholder="Full name" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Destination</label>
+            <select class="form-input" id="reg-to">
+              <option>Maun</option><option>Gaborone</option><option>Francistown</option>
+              <option>Kasane</option><option>Serowe</option><option>Lobatse</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Parcel Weight (kg)</label>
+            <input class="form-input" id="reg-weight" placeholder="e.g. 2.5" type="number" step="0.1" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Parcel Type</label>
+            <select class="form-input" id="reg-type">
+              <option>Standard Package</option><option>Fragile</option>
+              <option>Documents</option><option>Oversized</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn-primary" onclick="registerParcel()">Register Parcel & Generate Tracking Number →</button>
+        </div>
+        <div id="generated-tracking" style="display:none;" class="generated-id">
+          Tracking Number: <span id="gen-num"></span>
+        </div>
+      </div>
+
+      <!-- UPDATE STATUS -->
+      <div class="card">
+        <div class="card-title">Update Parcel Status</div>
+        <div class="form-grid">
+          <div class="form-field" style="grid-column:1/-1">
+            <label class="form-label">Tracking Number</label>
+            <input class="form-input" id="upd-tracking" placeholder="Enter tracking number" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Current Location</label>
+            <select class="form-input" id="upd-location">
+              <option>Gaborone Sorting Centre</option>
+              <option>Francistown Hub</option>
+              <option>Maun Delivery Office</option>
+              <option>Kasane Branch</option>
+              <option>Serowe Branch</option>
+              <option>Lobatse Branch</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="upd-status">
+              <option value="registered">Registered</option>
+              <option value="in-transit">In Transit</option>
+              <option value="at-hub">At Hub / Sorting Centre</option>
+              <option value="out-delivery">Out for Delivery</option>
+              <option value="delivered">Delivered</option>
+              <option value="exception">Exception / Hold</option>
+            </select>
+          </div>
+          <div class="form-field" style="grid-column:1/-1">
+            <label class="form-label">Notes (optional)</label>
+            <input class="form-input" id="upd-notes" placeholder="e.g. Awaiting customs clearance" />
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn-primary" onclick="updateStatus()">Update Parcel Status →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- AI ASSISTANT FAB -->
+<button id="ai-fab" onclick="toggleAI()" title="Ask AI Assistant">✦</button>
+
+<div id="ai-panel">
+  <div class="ai-header">
+    <div class="ai-avatar">AI</div>
+    <div class="ai-header-text">
+      <h3>BotswanaPost AI Assistant</h3>
+      <p>Powered by Claude — ask me anything about your parcel</p>
+    </div>
+    <button class="ai-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="msg ai">Dumela! 👋 I'm the BotswanaPost AI Assistant. Ask me about parcel tracking, delivery times, or how to send a package. How can I help you today?</div>
+  </div>
+  <div class="ai-input-row">
+    <textarea id="ai-input" rows="1" placeholder="Type your question..." onkeydown="aiKeyDown(event)"></textarea>
+    <button id="ai-send" onclick="sendAI()">→</button>
+  </div>
+</div>
+
+<script>
+// ─── PARCEL DATA ──────────────────────────────────────────────────────────────
+const PARCELS = {
+  'BP-2025-00142': {
+    sender: 'Kagiso Molefe', from: 'Gaborone',
+    receiver: 'Naledi Setshogo', to: 'Maun',
+    weight: '3.2 kg', type: 'Standard Package',
+    status: 'in-transit', statusLabel: 'In Transit',
+    history: [
+      { event: 'Parcel Registered', loc: 'Gaborone Main Post Office', time: '28 Apr 2025, 09:14', done: true },
+      { event: 'Departed Sorting Centre', loc: 'Gaborone Sorting Centre', time: '28 Apr 2025, 14:32', done: true },
+      { event: 'Arrived at Hub', loc: 'Francistown Hub', time: '29 Apr 2025, 06:45', done: true },
+      { event: 'In Transit to Destination', loc: 'Francistown → Maun Route', time: '29 Apr 2025, 11:00', current: true },
+      { event: 'Expected Delivery', loc: 'Maun Delivery Office', time: '01 May 2025', done: false },
+    ]
+  },
+  'BP-2025-00089': {
+    sender: 'Oratile Kgosi', from: 'Serowe',
+    receiver: 'Thato Nkosi', to: 'Kasane',
+    weight: '1.1 kg', type: 'Documents',
+    status: 'delivered', statusLabel: 'Delivered',
+    history: [
+      { event: 'Parcel Registered', loc: 'Serowe Branch', time: '22 Apr 2025, 10:00', done: true },
+      { event: 'Departed Sorting Centre', loc: 'Serowe Sorting Centre', time: '22 Apr 2025, 16:00', done: true },
+      { event: 'In Transit', loc: 'Serowe → Kasane Route', time: '23 Apr 2025, 08:00', done: true },
+      { event: 'Out for Delivery', loc: 'Kasane Delivery Office', time: '24 Apr 2025, 09:30', done: true },
+      { event: 'Delivered Successfully', loc: 'Kasane — Recipient Signed', time: '24 Apr 2025, 14:22', done: true },
+    ]
+  },
+  'BP-2025-00211': {
+    sender: 'Mpho Ditsele', from: 'Lobatse',
+    receiver: 'Boitshwarelo Tau', to: 'Francistown',
+    weight: '8.7 kg', type: 'Oversized',
+    status: 'exception', statusLabel: 'On Hold',
+    history: [
+      { event: 'Parcel Registered', loc: 'Lobatse Branch', time: '30 Apr 2025, 08:00', done: true },
+      { event: 'Departed Sorting Centre', loc: 'Lobatse Sorting Centre', time: '30 Apr 2025, 13:00', done: true },
+      { event: 'Hold — Address Verification', loc: 'Gaborone Sorting Centre', time: '30 Apr 2025, 18:45', current: true },
+    ]
+  }
+};
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── TRACKING ─────────────────────────────────────────────────────────────────
+function loadDemo(num) {
+  document.getElementById('track-num').value = num;
+  trackParcel();
+}
+
+function trackParcel() {
+  const num = document.getElementById('track-num').value.trim().toUpperCase();
+  const result = document.getElementById('tracking-result');
+
+  if (!num) { showToast('Please enter a tracking number', 'error'); return; }
+
+  const parcel = PARCELS[num];
+
+  if (!parcel) {
+    result.innerHTML = `<div class="card" style="border-color:rgba(196,64,64,0.3);text-align:center;padding:40px;">
+      <div style="font-size:32px;margin-bottom:12px;">⚠</div>
+      <p style="color:var(--text-dim);font-size:14px;">No parcel found for tracking number <strong style="color:var(--cream)">${num}</strong>. Please check the number and try again.</p>
+    </div>`;
+    return;
+  }
+
+  const statusClass = {
+    'in-transit': 'status-transit', 'delivered': 'status-delivered',
+    'pending': 'status-pending', 'exception': 'status-exception',
+    'registered': 'status-pending'
+  }[parcel.status] || 'status-pending';
+
+  const timelineHTML = parcel.history.map((h, i) => {
+    const cls = h.current ? 'current' : h.done ? 'done' : '';
+    return `<li class="timeline-item ${cls}">
+      <div class="timeline-dot-col">
+        <div class="timeline-dot"></div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-event">${h.event}</div>
+        <div class="timeline-loc">${h.loc}</div>
+        <div class="timeline-time">${h.time}</div>
+      </div>
+    </li>`;
+  }).join('');
+
+  result.innerHTML = `<div class="card fade-up">
+    <div class="parcel-header">
+      <div class="parcel-meta">
+        <h2>${num}</h2>
+        <p>${parcel.from} → ${parcel.to} · ${parcel.type}</p>
+      </div>
+      <span class="status-badge ${statusClass}">${parcel.statusLabel}</span>
+    </div>
+    <div class="info-grid">
+      <div class="info-cell"><label>Sender</label><p>${parcel.sender}</p></div>
+      <div class="info-cell"><label>From</label><p>${parcel.from}</p></div>
+      <div class="info-cell"><label>Receiver</label><p>${parcel.receiver}</p></div>
+      <div class="info-cell"><label>Destination</label><p>${parcel.to}</p></div>
+      <div class="info-cell"><label>Weight</label><p>${parcel.weight}</p></div>
+      <div class="info-cell"><label>Parcel Type</label><p>${parcel.type}</p></div>
+    </div>
+    <div class="timeline-title">Parcel History</div>
+    <ul class="timeline">${timelineHTML}</ul>
+  </div>`;
+}
+
+// ─── STAFF LOGIN ──────────────────────────────────────────────────────────────
+function staffLogin() {
+  const user = document.getElementById('staff-user').value.trim();
+  const pass = document.getElementById('staff-pass').value.trim();
+  if (!user || !pass) { showToast('Please enter credentials', 'error'); return; }
+  if (pass.length < 6) { showToast('Invalid credentials', 'error'); return; }
+  document.getElementById('staff-login').style.display = 'none';
+  document.getElementById('staff-dashboard').style.display = 'block';
+  showToast('Welcome, ' + user + '!', 'success');
+}
+
+// ─── REGISTER PARCEL ──────────────────────────────────────────────────────────
+function registerParcel() {
+  const sender = document.getElementById('reg-sender').value.trim();
+  const receiver = document.getElementById('reg-receiver').value.trim();
+  const from = document.getElementById('reg-from').value;
+  const to = document.getElementById('reg-to').value;
+  if (!sender || !receiver) { showToast('Please fill in sender and receiver details', 'error'); return; }
+  if (from === to) { showToast('Origin and destination cannot be the same', 'error'); return; }
+
+  const num = 'BP-2025-' + String(Math.floor(Math.random() * 89999) + 10000).padStart(5,'0');
+  document.getElementById('gen-num').textContent = num;
+  document.getElementById('generated-tracking').style.display = 'block';
+
+  PARCELS[num] = {
+    sender, from, receiver, to,
+    weight: (document.getElementById('reg-weight').value || '1') + ' kg',
+    type: document.getElementById('reg-type').value,
+    status: 'registered', statusLabel: 'Registered',
+    history: [{
+      event: 'Parcel Registered',
+      loc: from + ' Post Office',
+      time: new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+      done: true
+    }]
+  };
+  showToast('Parcel registered successfully!', 'success');
+}
+
+// ─── UPDATE STATUS ────────────────────────────────────────────────────────────
+function updateStatus() {
+  const num = document.getElementById('upd-tracking').value.trim().toUpperCase();
+  const loc = document.getElementById('upd-location').value;
+  const status = document.getElementById('upd-status').value;
+  const notes = document.getElementById('upd-notes').value.trim();
+
+  if (!num) { showToast('Please enter a tracking number', 'error'); return; }
+  if (!PARCELS[num]) { showToast('Tracking number not found in system', 'error'); return; }
+
+  const labels = {
+    'registered':'Registered','in-transit':'In Transit','at-hub':'At Hub',
+    'out-delivery':'Out for Delivery','delivered':'Delivered','exception':'Exception / Hold'
+  };
+
+  PARCELS[num].status = status;
+  PARCELS[num].statusLabel = labels[status];
+  PARCELS[num].history.push({
+    event: labels[status] + (notes ? ': ' + notes : ''),
+    loc,
+    time: new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+    current: true, done: status === 'delivered'
+  });
+
+  PARCELS[num].history.forEach((h, i) => { if (i < PARCELS[num].history.length - 1) { h.current = false; h.done = true; } });
+
+  showToast('Status updated for ' + num, 'success');
+  document.getElementById('upd-tracking').value = '';
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => { t.className = ''; }, 3000);
+}
+
+// ─── AI ASSISTANT ─────────────────────────────────────────────────────────────
+let aiOpen = false;
+let aiHistory = [];
+
+function toggleAI() {
+  aiOpen = !aiOpen;
+  document.getElementById('ai-panel').classList.toggle('open', aiOpen);
+  if (aiOpen) document.getElementById('ai-input').focus();
+}
+
+function aiKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
+}
+
+async function sendAI() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const messages = document.getElementById('ai-messages');
+  input.value = '';
+
+  // Add user message
+  messages.innerHTML += `<div class="msg user">${escHtml(text)}</div>`;
+  aiHistory.push({ role: 'user', content: text });
+
+  // Loading
+  const loadId = 'load-' + Date.now();
+  messages.innerHTML += `<div class="msg ai loading" id="${loadId}">Thinking…</div>`;
+  messages.scrollTop = messages.scrollHeight;
+
+  document.getElementById('ai-send').disabled = true;
+
+  try {
+    const systemPrompt = `You are the BotswanaPost AI Assistant, a helpful and friendly parcel tracking assistant for Botswana Post — Botswana's national postal service. You help customers and staff with:
+- Parcel tracking queries
+- Estimated delivery times across Botswana cities (Gaborone, Maun, Francistown, Kasane, Serowe, Lobatse, etc.)
+- How to send parcels (registration process, required info)
+- General postal service FAQs
+- Explaining tracking statuses (In Transit, At Hub, Out for Delivery, etc.)
+Keep responses concise, friendly, and professional. You may use Setswana greetings like "Dumela!" occasionally. Current date: ${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'long',year:'numeric'})}.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: aiHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I could not process that. Please try again.';
+
+    document.getElementById(loadId).className = 'msg ai';
+    document.getElementById(loadId).textContent = reply;
+    aiHistory.push({ role: 'assistant', content: reply });
+
+  } catch (err) {
+    document.getElementById(loadId).className = 'msg ai';
+    document.getElementById(loadId).textContent = 'Connection error. Please check your network and try again.';
+  }
+
+  document.getElementById('ai-send').disabled = false;
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
