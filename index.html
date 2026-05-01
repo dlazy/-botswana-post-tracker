@@ -197,7 +197,7 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
       <div id="user-area" style="display:none" class="hdr-user">
         <div class="hdr-avatar" id="hdr-av">?</div>
         <span id="hdr-nm" style="white-space:nowrap"></span>
-        <button class="btn-logout" onclick="doLogout()">Logout</button>
+        <button class="btn-logout" onclick="doLogout()">Log out</button>
       </div>
       <div class="db-info">
         <div class="db-dot" id="db-dot"></div>
@@ -576,28 +576,26 @@ let cUser=null,cRole=null,dbOK=false,fPId=null;
   try{const{error}=await db.from('parcels').select('id',{count:'exact',head:true});dbOK=!error;}catch{dbOK=false;}
   document.getElementById('db-dot').className='db-dot'+(dbOK?' ok':'');
   document.getElementById('db-txt').textContent=dbOK?'DB Connected':'DB Offline';
-  const{data:{session}}=await db.auth.getSession();
-  if(session)await onSession(session);
+  // Restore session from localStorage
+  const saved=localStorage.getItem('bp_staff');
+  if(saved){try{const d=JSON.parse(saved);if(d&&d.email)applySession(d);}catch{localStorage.removeItem('bp_staff');}}
 })();
-db.auth.onAuthStateChange(async(ev,s)=>{if(ev==='SIGNED_IN'&&s)await onSession(s);if(ev==='SIGNED_OUT')onOut();});
 
-async function onSession(s){
-  cUser=s.user;
-  const{data}=await db.from('staff').select('full_name,role,branch,status').eq('email',cUser.email).single();
-  if(data&&data.status!=='Inactive'){
-    cRole=data.role;
-    document.getElementById('pub-nav').style.display='none';
-    document.getElementById('staff-nav').style.display=cRole==='Staff'?'flex':'none';
-    document.getElementById('admin-nav').style.display=cRole==='Administrator'?'flex':'none';
-    document.getElementById('user-area').style.display='flex';
-    document.getElementById('hdr-av').textContent=(data.full_name||'U').charAt(0).toUpperCase();
-    document.getElementById('hdr-nm').textContent=data.full_name||'';
-    document.getElementById('sw-msg').textContent='Welcome back, '+(data.full_name||'')+' — '+(data.branch||'');
-    nav(cRole==='Administrator'?'adash':'sdash');
-  }else{await db.auth.signOut();toast('Account not found or inactive.','error');}
+function applySession(data){
+  cUser={email:data.email};cRole=data.role;
+  document.getElementById('pub-nav').style.display='none';
+  document.getElementById('staff-nav').style.display=cRole==='Staff'?'flex':'none';
+  document.getElementById('admin-nav').style.display=cRole==='Administrator'?'flex':'none';
+  document.getElementById('user-area').style.display='flex';
+  document.getElementById('hdr-av').textContent=(data.full_name||'U').charAt(0).toUpperCase();
+  document.getElementById('hdr-nm').textContent=data.full_name||'';
+  document.getElementById('sw-msg').textContent='Welcome back, '+(data.full_name||'')+' — '+(data.branch||'');
+  nav(cRole==='Administrator'?'adash':'sdash');
 }
+
 function onOut(){
   cUser=null;cRole=null;
+  localStorage.removeItem('bp_staff');
   document.getElementById('pub-nav').style.display='flex';
   document.getElementById('staff-nav').style.display='none';
   document.getElementById('admin-nav').style.display='none';
@@ -633,20 +631,31 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 async function audit(action,rec,desc){if(!cUser)return;try{await db.from('audit_logs').insert({user_email:cUser.email,action,record_affected:rec,description:desc,created_at:new Date().toISOString()});}catch{}}
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
+// ── AUTH (direct staff table — no Supabase Auth required) ────────────────────
 async function doLogin(){
-  const em=document.getElementById('l-email').value.trim();
+  const em=document.getElementById('l-email').value.trim().toLowerCase();
   const pw=document.getElementById('l-pass').value;
   const err=document.getElementById('l-err');
   const btn=document.getElementById('l-btn');
   err.style.display='none';
   if(!em||!pw){err.textContent='Please enter email and password.';err.style.display='block';return;}
   btn.disabled=true;btn.textContent='Signing in…';
-  const{error}=await db.auth.signInWithPassword({email:em,password:pw});
-  if(error){err.textContent='Invalid credentials. Please try again.';err.style.display='block';}
+  // Query staff table directly by email + password
+  const{data,error}=await db.from('staff').select('*').eq('email',em).eq('password',pw).single();
+  if(error||!data){
+    err.textContent='Invalid email or password. Please try again.';err.style.display='block';
+    btn.disabled=false;btn.textContent='Sign In →';return;
+  }
+  if(data.status==='Inactive'){
+    err.textContent='This account has been deactivated. Contact your administrator.';err.style.display='block';
+    btn.disabled=false;btn.textContent='Sign In →';return;
+  }
+  // Save session to localStorage
+  localStorage.setItem('bp_staff',JSON.stringify({email:data.email,role:data.role,full_name:data.full_name,branch:data.branch}));
+  applySession(data);
   btn.disabled=false;btn.textContent='Sign In →';
 }
-async function doLogout(){await db.auth.signOut();toast('Signed out.','success');}
+function doLogout(){onOut();toast('Signed out successfully.','success');}
 
 // ── TRACKING ──────────────────────────────────────────────────────────────────
 function homeTrack(){const v=document.getElementById('h-inp').value.trim();if(!v){toast('Please enter a tracking number.','error');return;}document.getElementById('t-inp').value=v;nav('track');doTrack();}
@@ -804,10 +813,10 @@ async function toggleSt(id,cur){
   if(!error){toast('Account '+ns.toLowerCase(),'success');loadAccounts();}else toast('Error: '+error.message,'error');
 }
 async function createStaff(){
-  const n=v('cs-n'),e=v('cs-e'),p=v('cs-p'),r=v('cs-r'),b=v('cs-b');
+  const n=v('cs-n'),e=v('cs-e').toLowerCase(),p=v('cs-p'),r=v('cs-r'),b=v('cs-b');
   if(!n||!e||!p){toast('Fill all required fields.','error');return;}
-  if(p.length<8){toast('Password must be at least 8 characters.','error');return;}
-  const{error}=await db.from('staff').insert({full_name:n,email:e,role:r,branch:b,status:'Active',created_at:new Date().toISOString()});
+  if(p.length<6){toast('Password must be at least 6 characters.','error');return;}
+  const{error}=await db.from('staff').insert({full_name:n,email:e,password:p,role:r,branch:b,status:'Active',created_at:new Date().toISOString()});
   if(error){toast('Error: '+error.message,'error');return;}
   await audit('CREATE_STAFF',e,'Created '+r+' account for '+n);
   toast('Staff account created!','success');closeModal('m-staff');loadAccounts();
