@@ -7,365 +7,1572 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#0B1929;--navy2:#112238;--navy3:#1a3352;--navy4:#234570;
-  --gold:#D4A832;--gold-l:#F0C84A;--gold-d:#8a6a14;
-  --blue:#1E6FD9;--blue-l:#3B8FFF;--blue-d:#0d4fa0;
-  --cream:#F5F0E8;--cream-d:#C8BBAA;
-  --text:#E8EEF5;--text-dim:#7A95B0;--text-muted:#3D5470;
-  --border:rgba(212,168,50,0.15);--border-b:rgba(30,111,217,0.2);--border-s:rgba(212,168,50,0.35);
-  --success:#2E9E5B;--error:#C44040;--warn:#D4A832;
-  --r:12px;--rs:8px;
+/* ═══════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Brand palette */
+  --navy:    #0B1929;
+  --navy2:   #112238;
+  --navy3:   #1a3352;
+  --navy4:   #234570;
+  --gold:    #D4A832;
+  --gold-l:  #F0C84A;
+  --gold-d:  #8a6a14;
+  --blue:    #1E6FD9;
+  --blue-l:  #3B8FFF;
+  --blue-d:  #0d4fa0;
+  --cream:   #F5F0E8;
+
+  /* Text scale */
+  --text:       #E8EEF5;
+  --text-dim:   #7A95B0;
+  --text-muted: #4a6480;  /* lifted from #3D5470 for better contrast */
+
+  /* Borders */
+  --border:   rgba(212,168,50,0.15);
+  --border-b: rgba(30,111,217,0.22);
+  --border-s: rgba(212,168,50,0.38);
+
+  /* Semantic */
+  --success: #2E9E5B;
+  --error:   #C44040;
+  --warn:    #D4A832;
+
+  /* Radii */
+  --r:  14px;
+  --rs: 9px;
+  --rx: 6px;
+
+  /* Transitions */
+  --t: 0.2s ease;
 }
-*{box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(30,111,217,0.02) 60px,rgba(30,111,217,0.02) 61px),repeating-linear-gradient(-45deg,transparent,transparent 60px,rgba(212,168,50,0.02) 60px,rgba(212,168,50,0.02) 61px);pointer-events:none;z-index:0}
-.app{display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
-header{background:rgba(11,25,41,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
-.hdr{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px}
-.logo{display:flex;align-items:center;gap:14px;cursor:pointer;flex-shrink:0}
-.logo-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--blue),var(--blue-d));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;border:1px solid rgba(59,143,255,0.3);box-shadow:0 2px 12px rgba(30,111,217,0.3)}
-.logo-txt{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--cream);line-height:1.2}
-.logo-txt span{display:block;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:400;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase}
-.hdr-right{display:flex;align-items:center;gap:10px;overflow:hidden}
-.hdr-nav{display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto}
-.hdr-nav a{font-size:12px;color:var(--text-dim);padding:6px 12px;border-radius:var(--rs);cursor:pointer;transition:all .2s;text-decoration:none;border:none;background:none;white-space:nowrap}
-.hdr-nav a:hover{color:var(--text);background:var(--navy3)}
-.hdr-user{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);flex-shrink:0}
-.hdr-avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--navy);flex-shrink:0}
-.btn-logout{font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--rs);background:none;color:var(--text-dim);cursor:pointer;transition:all .2s;flex-shrink:0}
-.btn-logout:hover{background:rgba(196,64,64,.1);border-color:rgba(196,64,64,.3);color:#e06060}
-.db-info{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.db-dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted)}
-.db-dot.ok{background:var(--success);box-shadow:0 0 0 3px rgba(46,158,91,.2)}
-.db-txt{font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace}
-main{flex:1;max-width:1200px;margin:0 auto;width:100%;padding:0 24px 80px}
-.page{display:none;animation:fadeUp .3s ease}
-.page.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.hero{padding:60px 0 36px;text-align:center}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,50px);font-weight:700;line-height:1.1;color:var(--cream);margin-bottom:14px}
-.hero h1 em{font-style:italic;color:var(--gold)}
-.hero-sub{font-size:15px;color:var(--text-dim);max-width:500px;margin:0 auto 36px;line-height:1.75}
-.track-box{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);padding:28px 32px;max-width:620px;margin:0 auto}
-.card-title{font-size:12px;font-weight:500;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
-.row{display:flex;gap:10px}
-.inp-wrap{flex:1;position:relative}
-.inp-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gold-d);font-size:15px;pointer-events:none}
-.inp{width:100%;background:var(--navy3);border:1px solid var(--border-b);border-radius:var(--rs);padding:12px 14px 12px 40px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
-.inp::placeholder{color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:13px}
-.inp:focus{border-color:var(--gold)}
-.inp.std{padding-left:14px;font-family:'DM Sans',sans-serif}
-.inp-full{width:100%}
-select.inp,.inp.sel{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a14' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;padding-left:14px;font-family:'DM Sans',sans-serif}
-textarea.inp{resize:vertical;min-height:88px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px}
-.btn{border:none;border-radius:var(--rs);padding:12px 22px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
-.btn-gold{background:var(--gold);color:var(--navy)}
-.btn-gold:hover:not(:disabled){background:var(--gold-l);transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,168,50,.3)}
-.btn-blue{background:var(--blue);color:#fff}
-.btn-blue:hover:not(:disabled){background:var(--blue-l);transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}
-.btn-ghost:hover:not(:disabled){background:var(--navy3);color:var(--text)}
-.btn-danger{background:transparent;color:#e06060;border:1px solid rgba(196,64,64,.3);padding:5px 12px;font-size:11px}
-.btn-danger:hover:not(:disabled){background:rgba(196,64,64,.1)}
-.btn-sm{padding:8px 16px;font-size:12px}
-.card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);padding:24px 28px;margin-bottom:18px}
-.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-.pg-hdr{padding:36px 0 20px}
-.pg-hdr h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--cream);margin-bottom:4px}
-.pg-hdr p{font-size:13px;color:var(--text-dim)}
-.bc{font-size:11px;color:var(--text-muted);margin-bottom:10px}
-.bc span{color:var(--text-dim)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
-.stat{background:var(--navy3);border:1px solid var(--border-b);border-radius:var(--rs);padding:16px;text-align:center}
-.stat-n{font-size:28px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;line-height:1}
-.stat-l{font-size:11px;color:var(--text-dim);margin-top:5px}
-.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-.ff{display:flex;flex-direction:column;gap:7px}
-.ff.full{grid-column:1/-1}
-.lbl{font-size:11px;color:var(--text-dim);letter-spacing:.3px}
-.lbl.r::after{content:' *';color:var(--gold)}
-.sec{font-size:11px;font-weight:600;color:var(--blue-l);letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border-b);padding-bottom:8px;margin-bottom:2px;grid-column:1/-1}
-.info-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:20px}
-.ic{background:var(--navy3);border-radius:var(--rs);padding:11px 14px}
-.ic label{font-size:10px;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:4px}
-.ic p{font-size:13px;color:var(--cream);font-weight:500}
-.tl-hdr{font-size:10px;color:var(--blue-l);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
-.tl{list-style:none}
-.tli{display:flex;gap:16px;padding-bottom:18px}
-.tli:last-child{padding-bottom:0}
-.tli-dc{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:18px}
-.tli-dot{width:11px;height:11px;border-radius:50%;background:var(--navy4);border:2px solid var(--text-muted);flex-shrink:0;margin-top:3px}
-.tli.done .tli-dot{background:var(--success);border-color:var(--success)}
-.tli.cur .tli-dot{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,168,50,.2);width:13px;height:13px}
-.tli-line{flex:1;width:1px;background:var(--border);margin-top:3px}
-.tli:last-child .tli-line{display:none}
-.tl-ev{font-size:13px;color:var(--cream);font-weight:500}
-.tl-loc{font-size:12px;color:var(--text-dim);margin-top:2px}
-.tl-t{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:3px}
-.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:14px;flex-wrap:wrap}
-.pm h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream);margin-bottom:3px}
-.pm p{font-size:12px;color:var(--text-dim)}
-.sp{font-size:10px;font-weight:600;padding:4px 12px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
-.s-reg{background:rgba(74,126,196,.15);color:#6e9de0;border:1px solid rgba(74,126,196,.3)}
-.s-tr{background:rgba(212,168,50,.15);color:var(--gold);border:1px solid rgba(212,168,50,.3)}
-.s-ar{background:rgba(30,111,217,.15);color:var(--blue-l);border:1px solid rgba(30,111,217,.3)}
-.s-od{background:rgba(150,100,200,.15);color:#b080e0;border:1px solid rgba(150,100,200,.3)}
-.s-de{background:rgba(46,158,91,.15);color:#5ec882;border:1px solid rgba(46,158,91,.3)}
-.s-dl{background:rgba(212,120,30,.15);color:#e08040;border:1px solid rgba(212,120,30,.3)}
-.s-rt{background:rgba(196,64,64,.15);color:#e06060;border:1px solid rgba(196,64,64,.3)}
-.s-lo{background:rgba(100,20,20,.3);color:#ff8080;border:1px solid rgba(196,64,64,.5)}
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{font-size:10px;font-weight:500;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;padding:9px 14px;border-bottom:1px solid var(--border);text-align:left}
-td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text-dim);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
-.alert{border-radius:var(--rs);padding:11px 14px;font-size:13px;margin-bottom:14px;line-height:1.6}
-.al-e{background:rgba(196,64,64,.08);border:1px solid rgba(196,64,64,.25);color:#e06060}
-.al-ok{background:rgba(46,158,91,.08);border:1px solid rgba(46,158,91,.25);color:#5ec882}
-.al-i{background:rgba(30,111,217,.08);border:1px solid rgba(30,111,217,.25);color:var(--blue-l)}
-.sbox{background:rgba(46,158,91,.07);border:1px solid rgba(46,158,91,.25);border-radius:var(--rs);padding:18px 22px;margin-top:18px;display:none}
-.sbox h3{font-size:14px;color:#5ec882;margin-bottom:5px}
-.sbox p{font-size:13px;color:var(--text-dim)}
-.tg{font-family:'DM Mono',monospace;font-size:18px;color:var(--gold);letter-spacing:2px;text-align:center;margin:10px 0;background:rgba(212,168,50,.08);border:1px dashed var(--gold-d);border-radius:var(--rs);padding:12px}
-.badge{font-size:10px;font-weight:500;padding:3px 9px;border-radius:12px;display:inline-block}
-.b-act{background:rgba(46,158,91,.15);color:#5ec882;border:1px solid rgba(46,158,91,.3)}
-.b-in{background:rgba(196,64,64,.1);color:#e06060;border:1px solid rgba(196,64,64,.25)}
-.b-st{background:rgba(30,111,217,.12);color:var(--blue-l);border:1px solid rgba(30,111,217,.3)}
-.b-ad{background:rgba(212,168,50,.12);color:var(--gold);border:1px solid rgba(212,168,50,.3)}
-#toast{position:fixed;bottom:24px;right:24px;background:var(--navy2);border:1px solid var(--border-s);border-radius:var(--rs);padding:11px 18px;font-size:13px;color:var(--text);z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:320px}
-#toast.show{opacity:1;transform:translateY(0)}
-#toast.success{border-left:3px solid var(--success)}
-#toast.error{border-left:3px solid var(--error)}
-#toast.warn{border-left:3px solid var(--warn)}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.modal-bg.open{display:flex}
-.modal{background:var(--navy2);border:1px solid var(--border-s);border-radius:var(--r);padding:28px;width:100%;max-width:440px;position:relative}
-.modal h3{font-family:'Playfair Display',serif;font-size:19px;color:var(--cream);margin-bottom:4px}
-.modal p{font-size:13px;color:var(--text-dim);margin-bottom:20px}
-.mc{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:17px}
-.login-wrap{max-width:380px;margin:56px auto}
-.ll{text-align:center;margin-bottom:28px}
-.ll .logo-mark{margin:0 auto 10px;width:52px;height:52px;font-size:20px}
-.ll h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream)}
-.ll p{font-size:12px;color:var(--text-dim);margin-top:4px}
-.live-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--success);background:rgba(46,158,91,.1);border:1px solid rgba(46,158,91,.25);border-radius:20px;padding:3px 10px;margin-bottom:14px}
-@media(max-width:640px){
-  main{padding:0 14px 60px}
-  .hdr{padding:0 14px}
-  .card{padding:16px}
-  .fg{grid-template-columns:1fr}
-  .row{flex-direction:column}
-  .stats{grid-template-columns:1fr 1fr}
-  .hdr-nav a{padding:5px 8px;font-size:11px}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(30,111,217,0.025) 60px, rgba(30,111,217,0.025) 61px),
+    repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(212,168,50,0.025) 60px, rgba(212,168,50,0.025) 61px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Global focus ring — accessibility */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: var(--rx);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  background: rgba(11,25,41,0.97);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.hdr {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  gap: 16px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logo-mark {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-d));
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  border: 1px solid rgba(59,143,255,0.35);
+  box-shadow: 0 2px 14px rgba(30,111,217,0.35);
+  transition: transform var(--t);
+}
+
+.logo:hover .logo-mark { transform: scale(1.05); }
+
+.logo-txt {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.2;
+}
+
+.logo-txt span {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Desktop nav */
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hdr-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.hdr-nav a {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 7px 13px;
+  border-radius: var(--rs);
+  cursor: pointer;
+  transition: all var(--t);
+  text-decoration: none;
+  border: none;
+  background: none;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.hdr-nav a:hover { color: var(--text); background: var(--navy3); }
+.hdr-nav a.cur  { color: var(--gold); background: rgba(212,168,50,0.1); }
+
+/* User badge */
+.hdr-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.hdr-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  flex-shrink: 0;
+  border: 2px solid rgba(212,168,50,0.4);
+}
+
+.hdr-name {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-logout {
+  font-size: 12px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--t);
+  flex-shrink: 0;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 34px;
+}
+
+.btn-logout:hover {
+  background: rgba(196,64,64,.1);
+  border-color: rgba(196,64,64,.35);
+  color: #e06060;
+}
+
+/* DB status indicator */
+.db-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.db-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background var(--t);
+}
+
+.db-dot.ok {
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(46,158,91,.25);
+}
+
+.db-txt {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+}
+
+/* Mobile hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 9px 10px;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: all var(--t);
+}
+
+/* Mobile drawer */
+.mobile-drawer {
+  display: none;
+  flex-direction: column;
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  gap: 2px;
+}
+
+.mobile-drawer.open { display: flex; }
+
+.mobile-drawer a {
+  font-size: 14px;
+  color: var(--text-dim);
+  padding: 11px 14px;
+  border-radius: var(--rs);
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  transition: all var(--t);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-drawer a:hover { background: var(--navy3); color: var(--text); }
+.mobile-drawer a.cur  { color: var(--gold); background: rgba(212,168,50,0.08); }
+
+/* ═══════════════════════════════════════════
+   MAIN LAYOUT
+═══════════════════════════════════════════ */
+main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 24px 80px;
+}
+
+.page { display: none; animation: fadeUp 0.3s ease; }
+.page.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  padding: 64px 0 40px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--cream);
+  margin-bottom: 16px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--text-dim);
+  max-width: 520px;
+  margin: 0 auto 40px;
+  line-height: 1.75;
+}
+
+.hero-chips {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 44px;
+}
+
+.hero-chip {
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--navy3);
+  border: 1px solid var(--border-b);
+  border-radius: 20px;
+  padding: 5px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ═══════════════════════════════════════════
+   TRACK BOX
+═══════════════════════════════════════════ */
+.track-box {
+  background: var(--navy2);
+  border: 1px solid var(--border-s);
+  border-radius: var(--r);
+  padding: 32px;
+  max-width: 640px;
+  margin: 0 auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY ELEMENTS
+═══════════════════════════════════════════ */
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.pg-hdr {
+  padding: 40px 0 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.pg-hdr h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: var(--cream);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.pg-hdr p {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* Breadcrumb */
+.bc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.bc span { color: var(--text-dim); }
+.bc::before { content: '›'; font-size: 14px; display: none; }
+
+/* ═══════════════════════════════════════════
+   FORMS & INPUTS
+═══════════════════════════════════════════ */
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.inp-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.inp-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold-d);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+/* Base input — min 44px height for touch targets */
+.inp {
+  width: 100%;
+  background: var(--navy3);
+  border: 1px solid var(--border-b);
+  border-radius: var(--rs);
+  padding: 13px 14px 13px 42px;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+  min-height: 48px;
+}
+
+.inp::placeholder {
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+}
+
+.inp:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,168,50,0.12);
+}
+
+.inp.std {
+  padding-left: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+}
+
+select.inp, .inp.sel {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a14' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  padding-left: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+}
+
+textarea.inp {
+  resize: vertical;
+  min-height: 96px;
+  padding: 13px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Form grid & fields */
+.fg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.ff {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ff.full { grid-column: 1 / -1; }
+
+.lbl {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 500;
+  display: block;
+}
+
+.lbl.r::after {
+  content: ' *';
+  color: var(--gold);
+}
+
+/* Section header inside form grids */
+.sec {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue-l);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-b);
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS — min 44px touch target
+═══════════════════════════════════════════ */
+.btn {
+  border: none;
+  border-radius: var(--rs);
+  padding: 13px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+  min-height: 48px;
+  letter-spacing: 0.2px;
+}
+
+.btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--navy);
+}
+.btn-gold:hover:not(:disabled) {
+  background: var(--gold-l);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(212,168,50,.35);
+}
+
+.btn-blue {
+  background: var(--blue);
+  color: #fff;
+}
+.btn-blue:hover:not(:disabled) {
+  background: var(--blue-l);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(30,111,217,.35);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--navy3);
+  color: var(--text);
+  border-color: var(--border-b);
+}
+
+.btn-danger {
+  background: transparent;
+  color: #e06060;
+  border: 1px solid rgba(196,64,64,.35);
+  padding: 7px 14px;
+  font-size: 12px;
+  min-height: 36px;
+}
+.btn-danger:hover:not(:disabled) { background: rgba(196,64,64,.1); }
+
+.btn-sm  { padding: 9px 18px; font-size: 13px; min-height: 40px; }
+.btn-xs  { padding: 6px 14px; font-size: 12px; min-height: 34px; }
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.card {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  transition: border-color var(--t);
+}
+
+.card:hover { border-color: rgba(212,168,50,0.22); }
+
+.card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ═══════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════ */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  background: var(--navy3);
+  border: 1px solid var(--border-b);
+  border-radius: var(--r);
+  padding: 20px 16px;
+  text-align: center;
+  transition: transform var(--t), border-color var(--t);
+  cursor: default;
+}
+
+.stat:hover {
+  transform: translateY(-2px);
+  border-color: rgba(30,111,217,0.4);
+}
+
+.stat-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.stat-n {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: 'Playfair Display', serif;
+  line-height: 1;
+}
+
+.stat-l {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* ═══════════════════════════════════════════
+   STATUS PILLS
+═══════════════════════════════════════════ */
+.sp {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.s-reg { background:rgba(74,126,196,.15); color:#7aaad0; border:1px solid rgba(74,126,196,.3); }
+.s-tr  { background:rgba(212,168,50,.15); color:var(--gold); border:1px solid rgba(212,168,50,.3); }
+.s-ar  { background:rgba(30,111,217,.15); color:var(--blue-l); border:1px solid rgba(30,111,217,.3); }
+.s-od  { background:rgba(150,100,200,.15); color:#b080e0; border:1px solid rgba(150,100,200,.3); }
+.s-de  { background:rgba(46,158,91,.15); color:#5ec882; border:1px solid rgba(46,158,91,.3); }
+.s-dl  { background:rgba(212,120,30,.15); color:#e08040; border:1px solid rgba(212,120,30,.3); }
+.s-rt  { background:rgba(196,64,64,.15); color:#e06060; border:1px solid rgba(196,64,64,.3); }
+.s-lo  { background:rgba(100,20,20,.3); color:#ff8080; border:1px solid rgba(196,64,64,.5); }
+
+/* ═══════════════════════════════════════════
+   TRACKING RESULT
+═══════════════════════════════════════════ */
+.ph {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pm h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.pm p { font-size: 13px; color: var(--text-dim); }
+
+.info-g {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.ic {
+  background: var(--navy3);
+  border-radius: var(--rs);
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+}
+
+.ic label {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.ic p {
+  font-size: 14px;
+  color: var(--cream);
+  font-weight: 500;
+}
+
+/* Timeline */
+.tl-hdr {
+  font-size: 11px;
+  color: var(--blue-l);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.tl { list-style: none; }
+
+.tli {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+.tli:last-child { padding-bottom: 0; }
+
+.tli-dc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.tli-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--navy4);
+  border: 2px solid var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 4px;
+  transition: all var(--t);
+}
+
+.tli.done .tli-dot { background: var(--success); border-color: var(--success); }
+.tli.cur  .tli-dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(212,168,50,.2); width: 14px; height: 14px; }
+
+.tli-line {
+  flex: 1;
+  width: 1px;
+  background: var(--border);
+  margin-top: 4px;
+}
+
+.tli:last-child .tli-line { display: none; }
+
+.tl-ev  { font-size: 14px; color: var(--cream); font-weight: 500; }
+.tl-loc { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.tl-t   { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-top: 4px; }
+
+/* ═══════════════════════════════════════════
+   TABLES
+═══════════════════════════════════════════ */
+.tw {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--rs);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 480px;
+}
+
+th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text-dim);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background var(--t); }
+tbody tr:hover td { background: rgba(30,111,217,0.04); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════ */
+.alert {
+  border-radius: var(--rs);
+  padding: 13px 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.al-e  { background:rgba(196,64,64,.08); border:1px solid rgba(196,64,64,.28); color:#e06060; }
+.al-ok { background:rgba(46,158,91,.08); border:1px solid rgba(46,158,91,.28); color:#5ec882; }
+.al-i  { background:rgba(30,111,217,.08); border:1px solid rgba(30,111,217,.28); color:var(--blue-l); }
+
+/* Success box */
+.sbox {
+  background: rgba(46,158,91,.07);
+  border: 1px solid rgba(46,158,91,.28);
+  border-radius: var(--rs);
+  padding: 20px 24px;
+  margin-top: 20px;
+  display: none;
+}
+
+.sbox h3 { font-size: 15px; color: #5ec882; margin-bottom: 6px; font-weight: 600; }
+.sbox p  { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+
+.tg {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-align: center;
+  margin: 12px 0;
+  background: rgba(212,168,50,.08);
+  border: 1px dashed var(--gold-d);
+  border-radius: var(--rs);
+  padding: 14px;
+}
+
+/* ═══════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════ */
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  letter-spacing: 0.3px;
+}
+
+.b-act { background:rgba(46,158,91,.15); color:#5ec882; border:1px solid rgba(46,158,91,.3); }
+.b-in  { background:rgba(196,64,64,.1); color:#e06060; border:1px solid rgba(196,64,64,.25); }
+.b-st  { background:rgba(30,111,217,.12); color:var(--blue-l); border:1px solid rgba(30,111,217,.3); }
+.b-ad  { background:rgba(212,168,50,.12); color:var(--gold); border:1px solid rgba(212,168,50,.3); }
+
+/* ═══════════════════════════════════════════
+   LIVE BADGE
+═══════════════════════════════════════════ */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--success);
+  background: rgba(46,158,91,.1);
+  border: 1px solid rgba(46,158,91,.28);
+  border-radius: 20px;
+  padding: 4px 12px;
+  margin-bottom: 18px;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--navy3);
+  border: 1px solid var(--border-s);
+  border-radius: var(--rs);
+  padding: 13px 20px;
+  font-size: 14px;
+  color: var(--text);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  max-width: 340px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.success { border-left: 3px solid var(--success); }
+#toast.error   { border-left: 3px solid var(--error); }
+#toast.warn    { border-left: 3px solid var(--warn); }
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeBg 0.2s ease;
+}
+
+.modal-bg.open { display: flex; }
+
+@keyframes fadeBg { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--navy2);
+  border: 1px solid var(--border-s);
+  border-radius: var(--r);
+  padding: 32px;
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  animation: slideUp 0.25s ease;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.modal h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--cream); margin-bottom: 4px; }
+.modal p  { font-size: 14px; color: var(--text-dim); margin-bottom: 22px; line-height: 1.6; }
+
+.mc {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--t);
+}
+
+.mc:hover { background: rgba(196,64,64,.15); color: #e06060; border-color: rgba(196,64,64,.3); }
+
+/* ═══════════════════════════════════════════
+   LOGIN PAGE
+═══════════════════════════════════════════ */
+.login-wrap {
+  max-width: 400px;
+  margin: 60px auto;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo .logo-mark {
+  margin: 0 auto 14px;
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.login-logo h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+
+.login-logo p {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════ */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+  display: block;
+  opacity: 0.6;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 280px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  background: var(--navy2);
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--t);
+  text-decoration: none;
+}
+
+.footer-links a:hover { color: var(--text-dim); }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  main { padding: 0 16px 60px; }
+  .hdr { padding: 0 16px; height: 62px; }
+
+  .hdr-nav { display: none; }
+  .hdr-name { display: none; }
+  .hamburger { display: flex; }
+  .db-txt { display: none; }
+
+  .card { padding: 20px; }
+  .track-box { padding: 22px; }
+  .fg { grid-template-columns: 1fr; }
+  .row { flex-direction: column; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .pg-hdr { padding: 24px 0 16px; }
+
+  .footer-inner { flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+
+  /* Admin 2-col grid → 1-col on mobile */
+  .admin-grid { grid-template-columns: 1fr !important; }
+
+  table { min-width: 380px; font-size: 12px; }
+  th, td { padding: 10px 12px; }
+}
+
+@media (max-width: 480px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .btn { min-height: 44px; padding: 11px 18px; font-size: 14px; }
+  .hero { padding: 40px 0 28px; }
+  .login-wrap { margin: 32px auto; }
 }
 </style>
 </head>
 <body>
 <div class="app">
 
+<!-- ═══ HEADER ════════════════════════════════════════════════════════════════ -->
 <header>
   <div class="hdr">
-    <div class="logo" onclick="nav('home')">
-      <div class="logo-mark">BP</div>
-      <div class="logo-txt">BotswanaPost<span>Parcel Tracking System</span></div>
-    </div>
-    <div class="hdr-right">
-      <nav class="hdr-nav" id="pub-nav">
-        <a onclick="nav('home')">Home</a>
-        <a onclick="nav('track')">Track Parcel</a>
-        <a onclick="nav('enquiry')">Submit Enquiry</a>
-        <a onclick="nav('login')">Staff Login</a>
-      </nav>
-      <nav class="hdr-nav" id="staff-nav" style="display:none">
-        <a onclick="nav('sdash')">Dashboard</a>
-        <a onclick="nav('register')">Register</a>
-        <a onclick="nav('update')">Update Status</a>
-        <a onclick="nav('delivery')">Confirm Delivery</a>
-        <a onclick="nav('search')">Search</a>
-      </nav>
-      <nav class="hdr-nav" id="admin-nav" style="display:none">
-        <a onclick="nav('adash')">Dashboard</a>
-        <a onclick="nav('accounts')">Staff Accounts</a>
-        <a onclick="nav('reports')">Reports</a>
-        <a onclick="nav('enq-admin')">Enquiries</a>
-        <a onclick="nav('audit')">Audit Logs</a>
-      </nav>
-      <div id="user-area" style="display:none" class="hdr-user">
-        <div class="hdr-avatar" id="hdr-av">?</div>
-        <span id="hdr-nm" style="white-space:nowrap"></span>
-        <button class="btn-logout" onclick="doLogout()">Log out</button>
+    <div class="logo" onclick="nav('home')" role="button" aria-label="Go to home page" tabindex="0">
+      <div class="logo-mark" aria-hidden="true">BP</div>
+      <div class="logo-txt">
+        BotswanaPost
+        <span>Parcel Tracking System</span>
       </div>
-      <div class="db-info">
-        <div class="db-dot" id="db-dot"></div>
+    </div>
+
+    <div class="hdr-right">
+      <!-- Desktop navs -->
+      <nav class="hdr-nav" id="pub-nav" aria-label="Public navigation">
+        <a onclick="nav('home')"    role="button" tabindex="0">🏠 Home</a>
+        <a onclick="nav('track')"   role="button" tabindex="0">📦 Track Parcel</a>
+        <a onclick="nav('enquiry')" role="button" tabindex="0">✉️ Submit Enquiry</a>
+        <a onclick="nav('login')"   role="button" tabindex="0">🔐 Staff Login</a>
+      </nav>
+      <nav class="hdr-nav" id="staff-nav" style="display:none" aria-label="Staff navigation">
+        <a onclick="nav('sdash')"    role="button" tabindex="0">📊 Dashboard</a>
+        <a onclick="nav('register')" role="button" tabindex="0">➕ Register</a>
+        <a onclick="nav('update')"   role="button" tabindex="0">🔄 Update</a>
+        <a onclick="nav('delivery')" role="button" tabindex="0">✅ Delivery</a>
+        <a onclick="nav('search')"   role="button" tabindex="0">🔍 Search</a>
+      </nav>
+      <nav class="hdr-nav" id="admin-nav" style="display:none" aria-label="Admin navigation">
+        <a onclick="nav('adash')"      role="button" tabindex="0">📊 Dashboard</a>
+        <a onclick="nav('accounts')"   role="button" tabindex="0">👥 Accounts</a>
+        <a onclick="nav('reports')"    role="button" tabindex="0">📈 Reports</a>
+        <a onclick="nav('enq-admin')"  role="button" tabindex="0">📋 Enquiries</a>
+        <a onclick="nav('audit')"      role="button" tabindex="0">🔍 Audit Logs</a>
+      </nav>
+
+      <!-- Logged-in user -->
+      <div id="user-area" style="display:none" class="hdr-user">
+        <div class="hdr-avatar" id="hdr-av" aria-hidden="true">?</div>
+        <span class="hdr-name" id="hdr-nm"></span>
+        <button class="btn-logout" onclick="doLogout()" aria-label="Log out">Log out</button>
+      </div>
+
+      <!-- DB status -->
+      <div class="db-info" aria-live="polite" aria-label="Database connection status">
+        <div class="db-dot" id="db-dot" role="status"></div>
         <span class="db-txt" id="db-txt">Connecting…</span>
       </div>
+
+      <!-- Mobile hamburger -->
+      <button class="hamburger" id="ham-btn" onclick="toggleDrawer()" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
+
+  <!-- Mobile drawer -->
+  <nav class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation">
+    <a onclick="nav('home');closeDrawer()"    id="mob-home">🏠 Home</a>
+    <a onclick="nav('track');closeDrawer()"   id="mob-track">📦 Track Parcel</a>
+    <a onclick="nav('enquiry');closeDrawer()" id="mob-enq">✉️ Submit Enquiry</a>
+    <a onclick="nav('login');closeDrawer()"   id="mob-login" class="staff-hidden">🔐 Staff Login</a>
+    <a onclick="nav('sdash');closeDrawer()"   id="mob-sdash" class="staff-only" style="display:none">📊 Dashboard</a>
+    <a onclick="nav('register');closeDrawer()"id="mob-reg"   class="staff-only" style="display:none">➕ Register Parcel</a>
+    <a onclick="nav('update');closeDrawer()"  id="mob-upd"   class="staff-only" style="display:none">🔄 Update Status</a>
+    <a onclick="nav('delivery');closeDrawer()"id="mob-del"   class="staff-only" style="display:none">✅ Confirm Delivery</a>
+    <a onclick="nav('search');closeDrawer()"  id="mob-srch"  class="staff-only" style="display:none">🔍 Search</a>
+    <a onclick="nav('adash');closeDrawer()"   id="mob-adash" class="admin-only" style="display:none">📊 Admin Dashboard</a>
+    <a onclick="nav('accounts');closeDrawer()"id="mob-ac"    class="admin-only" style="display:none">👥 Staff Accounts</a>
+    <a onclick="nav('reports');closeDrawer()" id="mob-rp"    class="admin-only" style="display:none">📈 Reports</a>
+    <a onclick="nav('enq-admin');closeDrawer()"id="mob-eq"   class="admin-only" style="display:none">📋 Enquiries</a>
+    <a onclick="nav('audit');closeDrawer()"   id="mob-aud"   class="admin-only" style="display:none">🔍 Audit Logs</a>
+    <a onclick="doLogout();closeDrawer()"     id="mob-out"   class="staff-only" style="display:none;color:#e06060">🚪 Log out</a>
+  </nav>
 </header>
 
+<!-- ═══ MAIN ══════════════════════════════════════════════════════════════════ -->
 <main>
 
-<!-- HOME -->
+<!-- HOME ─────────────────────────────────────────────────────────────────── -->
 <div class="page active" id="page-home">
   <div class="hero">
     <h1>Track Your Parcel<br><em>Anytime, Anywhere</em></h1>
-    <p class="hero-sub">Enter your BotswanaPost tracking number below to view the latest status, current location, and movement history of your parcel.</p>
+    <p class="hero-sub">Enter your BotswanaPost tracking number to view the latest status, current location, and movement history of your parcel.</p>
+    <div class="hero-chips">
+      <span class="hero-chip">📍 Real-time tracking</span>
+      <span class="hero-chip">🕐 Full movement history</span>
+      <span class="hero-chip">🏢 5 branches nationwide</span>
+      <span class="hero-chip">🔓 No login required</span>
+    </div>
   </div>
-  <div class="track-box">
+
+  <div class="track-box" role="search">
     <div class="card-title">Track Your Parcel</div>
     <div class="row">
       <div class="inp-wrap">
-        <span class="inp-icon">⬡</span>
-        <input class="inp" id="h-inp" placeholder="e.g. BP-2026-004581" onkeydown="if(event.key==='Enter')homeTrack()"/>
+        <span class="inp-icon" aria-hidden="true">⬡</span>
+        <label for="h-inp" class="sr-only">Tracking number</label>
+        <input
+          class="inp"
+          id="h-inp"
+          type="text"
+          placeholder="e.g. BP-2026-004581"
+          autocomplete="off"
+          spellcheck="false"
+          onkeydown="if(event.key==='Enter') homeTrack()"
+          aria-label="Enter parcel tracking number"
+        />
       </div>
-      <button class="btn btn-gold" onclick="homeTrack()">Track →</button>
+      <button class="btn btn-gold" onclick="homeTrack()" aria-label="Track parcel">
+        Track Parcel →
+      </button>
     </div>
-    <p style="margin-top:12px;font-size:11px;color:var(--text-muted)">No login required. Customers can track parcels freely.</p>
+    <p style="margin-top:14px;font-size:13px;color:var(--text-muted)">
+      Customers can track parcels without logging in.
+    </p>
   </div>
 </div>
 
-<!-- TRACK -->
+<!-- TRACK ─────────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-track">
   <div class="pg-hdr">
-    <div class="bc">Home › <span>Track Parcel</span></div>
-    <h1>Track Parcel</h1><p>View current status and movement history</p>
+    <div class="bc"><span>Home</span> › <span>Track Parcel</span></div>
+    <h1>Track Parcel</h1>
+    <p>View current status and full movement history of any parcel</p>
   </div>
   <div class="card">
     <div class="card-title">Tracking Lookup</div>
-    <div class="row" style="max-width:560px">
-      <div class="inp-wrap"><span class="inp-icon">⬡</span>
-        <input class="inp" id="t-inp" placeholder="e.g. BP-2026-004581" onkeydown="if(event.key==='Enter')doTrack()"/>
+    <div class="row" style="max-width:580px">
+      <div class="inp-wrap">
+        <span class="inp-icon" aria-hidden="true">⬡</span>
+        <label for="t-inp" class="sr-only">Tracking number</label>
+        <input class="inp" id="t-inp" type="text" placeholder="e.g. BP-2026-004581" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') doTrack()" aria-label="Enter tracking number" />
       </div>
       <button class="btn btn-gold" id="t-btn" onclick="doTrack()">Search</button>
     </div>
   </div>
-  <div id="t-res"></div>
+  <div id="t-res" aria-live="polite"></div>
 </div>
 
-<!-- LOGIN -->
+<!-- LOGIN ─────────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-login">
   <div class="login-wrap">
-    <div class="ll">
-      <div class="logo-mark" style="background:linear-gradient(135deg,var(--blue),var(--blue-d))">BP</div>
-      <h2>Staff Portal</h2><p>Sign in with your BotswanaPost account</p>
+    <div class="login-logo">
+      <div class="logo-mark" style="background:linear-gradient(135deg,var(--blue),var(--blue-d))" aria-hidden="true">BP</div>
+      <h2>Staff Portal</h2>
+      <p>Sign in with your BotswanaPost account</p>
     </div>
     <div class="card">
-      <div id="l-err" class="alert al-e" style="display:none"></div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="ff"><label class="lbl r">Email Address</label><input class="inp std" id="l-email" type="email" placeholder="staff@botswanapost.co.bw"/></div>
-        <div class="ff"><label class="lbl r">Password</label><input class="inp std" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-        <button class="btn btn-blue" id="l-btn" onclick="doLogin()">Sign In →</button>
-        <p style="font-size:11px;color:var(--text-muted);text-align:center">Authorised BotswanaPost staff only.</p>
-      </div>
+      <div id="l-err" class="alert al-e" style="display:none" role="alert" aria-live="assertive"></div>
+      <form onsubmit="event.preventDefault();doLogin()" novalidate style="display:flex;flex-direction:column;gap:18px">
+        <div class="ff">
+          <label class="lbl r" for="l-email">Email Address</label>
+          <input class="inp std" id="l-email" type="email" placeholder="staff@botswanapost.co.bw" autocomplete="email" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="l-pass">Password</label>
+          <input class="inp std" id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button class="btn btn-blue" id="l-btn" type="submit">Sign In →</button>
+        <p style="font-size:13px;color:var(--text-muted);text-align:center">
+          Authorised BotswanaPost staff only.
+        </p>
+      </form>
     </div>
   </div>
 </div>
 
-<!-- STAFF DASHBOARD -->
+<!-- STAFF DASHBOARD ───────────────────────────────────────────────────────── -->
 <div class="page" id="page-sdash">
-  <div class="pg-hdr"><h1>Staff Dashboard</h1><p id="sw-msg">Welcome back</p></div>
-  <div class="stats">
-    <div class="stat"><div class="stat-n" id="sd-td">—</div><div class="stat-l">Registered Today</div></div>
-    <div class="stat"><div class="stat-n" id="sd-tr">—</div><div class="stat-l">In Transit</div></div>
-    <div class="stat"><div class="stat-n" id="sd-dv">—</div><div class="stat-l">Delivered</div></div>
-    <div class="stat"><div class="stat-n" id="sd-ex">—</div><div class="stat-l">Delayed / Issues</div></div>
+  <div class="pg-hdr">
+    <h1>Staff Dashboard</h1>
+    <p id="sw-msg">Welcome back</p>
+  </div>
+  <div class="stats" role="region" aria-label="Parcel statistics">
+    <div class="stat">
+      <span class="stat-icon" aria-hidden="true">📦</span>
+      <div class="stat-n" id="sd-td">—</div>
+      <div class="stat-l">Registered Today</div>
+    </div>
+    <div class="stat">
+      <span class="stat-icon" aria-hidden="true">🚚</span>
+      <div class="stat-n" id="sd-tr">—</div>
+      <div class="stat-l">In Transit</div>
+    </div>
+    <div class="stat">
+      <span class="stat-icon" aria-hidden="true">✅</span>
+      <div class="stat-n" id="sd-dv">—</div>
+      <div class="stat-l">Delivered</div>
+    </div>
+    <div class="stat">
+      <span class="stat-icon" aria-hidden="true">⚠️</span>
+      <div class="stat-n" id="sd-ex">—</div>
+      <div class="stat-l">Delayed / Issues</div>
+    </div>
   </div>
   <div class="card">
     <div class="card-title">Quick Actions</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-gold" onclick="nav('register')">+ Register Parcel</button>
-      <button class="btn btn-blue" onclick="nav('update')">Update Status</button>
-      <button class="btn btn-ghost" onclick="nav('delivery')">Confirm Delivery</button>
-      <button class="btn btn-ghost" onclick="nav('search')">Search Parcel</button>
+      <button class="btn btn-gold" onclick="nav('register')">➕ Register Parcel</button>
+      <button class="btn btn-blue" onclick="nav('update')">🔄 Update Status</button>
+      <button class="btn btn-ghost" onclick="nav('delivery')">✅ Confirm Delivery</button>
+      <button class="btn btn-ghost" onclick="nav('search')">🔍 Search Parcel</button>
     </div>
   </div>
   <div class="card">
     <div class="card-title">Recent Parcels</div>
-    <div class="tw"><table>
-      <thead><tr><th>Tracking #</th><th>Sender</th><th>Destination</th><th>Status</th><th>Date</th></tr></thead>
-      <tbody id="sd-rows"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr></tbody>
-    </table></div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Tracking #</th>
+            <th scope="col">Sender</th>
+            <th scope="col">Destination</th>
+            <th scope="col">Status</th>
+            <th scope="col">Date</th>
+          </tr>
+        </thead>
+        <tbody id="sd-rows">
+          <tr><td colspan="5"><div class="empty-state"><span class="empty-icon">⏳</span><p>Loading recent parcels…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- REGISTER -->
+<!-- REGISTER PARCEL ───────────────────────────────────────────────────────── -->
 <div class="page" id="page-register">
   <div class="pg-hdr">
-    <div class="bc">Dashboard › <span>Register Parcel</span></div>
-    <h1>Register New Parcel</h1><p>Complete all required fields to generate a tracking number</p>
+    <div class="bc"><span>Dashboard</span> › <span>Register Parcel</span></div>
+    <h1>Register New Parcel</h1>
+    <p>Complete all required fields to generate a unique tracking number</p>
   </div>
   <div class="card">
-    <div class="fg">
-      <div class="sec">Sender Details</div>
-      <div class="ff"><label class="lbl r">Full Name</label><input class="inp std" id="sn" placeholder="Full name"/></div>
-      <div class="ff"><label class="lbl r">Phone Number</label><input class="inp std" id="sp" placeholder="+267 7X XXX XXX"/></div>
-      <div class="ff"><label class="lbl">Email</label><input class="inp std" id="se" type="email" placeholder="sender@email.com"/></div>
-      <div class="ff"><label class="lbl">Address</label><input class="inp std" id="sa" placeholder="Address / P.O. Box"/></div>
-      <div class="sec">Receiver Details</div>
-      <div class="ff"><label class="lbl r">Full Name</label><input class="inp std" id="rn" placeholder="Full name"/></div>
-      <div class="ff"><label class="lbl r">Phone Number</label><input class="inp std" id="rp" placeholder="+267 7X XXX XXX"/></div>
-      <div class="ff"><label class="lbl">Email</label><input class="inp std" id="re" type="email" placeholder="receiver@email.com"/></div>
-      <div class="ff"><label class="lbl">Address</label><input class="inp std" id="ra" placeholder="Address / P.O. Box"/></div>
-      <div class="sec">Parcel Details</div>
-      <div class="ff"><label class="lbl r">Origin Branch</label>
-        <select class="inp sel" id="po"><option value="">Select…</option><option>Gaborone Main</option><option>Francistown Hub</option><option>Maun Branch</option><option>Kasane Branch</option><option>Serowe Branch</option></select>
+    <form onsubmit="event.preventDefault();registerParcel()" novalidate>
+      <div class="fg">
+        <div class="sec">Sender Details</div>
+        <div class="ff">
+          <label class="lbl r" for="sn">Full Name</label>
+          <input class="inp std" id="sn" type="text" placeholder="Full name" autocomplete="name" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="sp">Phone Number</label>
+          <input class="inp std" id="sp" type="tel" placeholder="+267 7X XXX XXX" autocomplete="tel" required />
+        </div>
+        <div class="ff">
+          <label class="lbl" for="se">Email Address</label>
+          <input class="inp std" id="se" type="email" placeholder="sender@email.com" autocomplete="email" />
+        </div>
+        <div class="ff">
+          <label class="lbl" for="sa">Address</label>
+          <input class="inp std" id="sa" type="text" placeholder="Address / P.O. Box" />
+        </div>
+
+        <div class="sec">Receiver Details</div>
+        <div class="ff">
+          <label class="lbl r" for="rn">Full Name</label>
+          <input class="inp std" id="rn" type="text" placeholder="Full name" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="rp">Phone Number</label>
+          <input class="inp std" id="rp" type="tel" placeholder="+267 7X XXX XXX" required />
+        </div>
+        <div class="ff">
+          <label class="lbl" for="re">Email Address</label>
+          <input class="inp std" id="re" type="email" placeholder="receiver@email.com" />
+        </div>
+        <div class="ff">
+          <label class="lbl" for="ra">Address</label>
+          <input class="inp std" id="ra" type="text" placeholder="Address / P.O. Box" />
+        </div>
+
+        <div class="sec">Parcel Details</div>
+        <div class="ff">
+          <label class="lbl r" for="po">Origin Branch</label>
+          <select class="inp sel" id="po" required>
+            <option value="">Select branch…</option>
+            <option>Gaborone Main</option>
+            <option>Francistown Hub</option>
+            <option>Maun Branch</option>
+            <option>Kasane Branch</option>
+            <option>Serowe Branch</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="pd">Destination Branch</label>
+          <select class="inp sel" id="pd" required>
+            <option value="">Select branch…</option>
+            <option>Gaborone Main</option>
+            <option>Francistown Hub</option>
+            <option>Maun Branch</option>
+            <option>Kasane Branch</option>
+            <option>Serowe Branch</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="pw">Weight (kg)</label>
+          <input class="inp std" id="pw" type="number" step="0.1" min="0.1" placeholder="e.g. 2.5" required />
+        </div>
+        <div class="ff">
+          <label class="lbl" for="pt">Parcel Type</label>
+          <select class="inp sel" id="pt">
+            <option>Standard Package</option>
+            <option>Fragile</option>
+            <option>Documents</option>
+            <option>Oversized</option>
+            <option>Perishable</option>
+          </select>
+        </div>
+        <div class="ff full">
+          <label class="lbl r" for="pd2">Parcel Description</label>
+          <input class="inp std" id="pd2" type="text" placeholder="Brief description of contents" required />
+        </div>
+        <div class="ff">
+          <label class="lbl" for="pe">Expected Delivery Date</label>
+          <input class="inp std" id="pe" type="date" />
+        </div>
       </div>
-      <div class="ff"><label class="lbl r">Destination Branch</label>
-        <select class="inp sel" id="pd"><option value="">Select…</option><option>Gaborone Main</option><option>Francistown Hub</option><option>Maun Branch</option><option>Kasane Branch</option><option>Serowe Branch</option></select>
+
+      <div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-gold" id="reg-btn" type="submit">Register Parcel →</button>
+        <button class="btn btn-ghost" type="button" onclick="clearReg()">Clear Form</button>
       </div>
-      <div class="ff"><label class="lbl r">Weight (kg)</label><input class="inp std" id="pw" type="number" step="0.1" min="0.1" placeholder="e.g. 2.5"/></div>
-      <div class="ff"><label class="lbl">Parcel Type</label>
-        <select class="inp sel" id="pt"><option>Standard Package</option><option>Fragile</option><option>Documents</option><option>Oversized</option><option>Perishable</option></select>
-      </div>
-      <div class="ff full"><label class="lbl r">Parcel Description</label><input class="inp std" id="pd2" placeholder="Brief description of contents"/></div>
-      <div class="ff"><label class="lbl">Expected Delivery Date</label><input class="inp std" id="pe" type="date"/></div>
+    </form>
+
+    <div class="sbox" id="reg-ok" role="status">
+      <h3>✓ Parcel Registered Successfully</h3>
+      <p>Parcel saved to database. Share this tracking number with the sender:</p>
+      <div class="tg" id="reg-tn" aria-live="polite"></div>
+      <p style="font-size:13px;margin-top:8px;color:var(--text-muted)">Format: BP-YYYY-XXXXXX</p>
     </div>
-    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-gold" id="reg-btn" onclick="registerParcel()">Register Parcel →</button>
-      <button class="btn btn-ghost" onclick="clearReg()">Clear Form</button>
-    </div>
-    <div class="sbox" id="reg-ok"><h3>✓ Parcel Registered Successfully</h3><p>Parcel saved to database. Share this tracking number with the sender:</p><div class="tg" id="reg-tn"></div><p style="font-size:11px;margin-top:6px">Format: BP-YYYY-XXXXXX</p></div>
   </div>
 </div>
 
-<!-- UPDATE STATUS -->
+<!-- UPDATE STATUS ─────────────────────────────────────────────────────────── -->
 <div class="page" id="page-update">
   <div class="pg-hdr">
-    <div class="bc">Dashboard › <span>Update Parcel Status</span></div>
-    <h1>Update Parcel Status</h1><p>Search for a parcel and record a status change</p>
+    <div class="bc"><span>Dashboard</span> › <span>Update Parcel Status</span></div>
+    <h1>Update Parcel Status</h1>
+    <p>Search for a parcel, then record a status change and location update</p>
   </div>
   <div class="card">
     <div class="card-title">Find Parcel</div>
-    <div class="row" style="max-width:500px">
-      <div class="inp-wrap"><span class="inp-icon">⬡</span>
-        <input class="inp" id="u-inp" placeholder="Enter tracking number" onkeydown="if(event.key==='Enter')findParcel()"/>
+    <div class="row" style="max-width:520px">
+      <div class="inp-wrap">
+        <span class="inp-icon" aria-hidden="true">⬡</span>
+        <label for="u-inp" class="sr-only">Tracking number</label>
+        <input class="inp" id="u-inp" type="text" placeholder="Enter tracking number" onkeydown="if(event.key==='Enter') findParcel()" aria-label="Enter tracking number to find" />
       </div>
       <button class="btn btn-blue" id="u-find" onclick="findParcel()">Search</button>
     </div>
-    <div id="u-info" style="display:none;margin-top:18px">
+
+    <div id="u-info" style="display:none;margin-top:22px">
       <div class="info-g" id="u-ig"></div>
-      <div class="fg" style="margin-top:16px">
+      <div class="fg" style="margin-top:18px">
         <div class="sec">Status Update</div>
-        <div class="ff"><label class="lbl r">New Status</label>
+        <div class="ff">
+          <label class="lbl r" for="u-st">New Status</label>
           <select class="inp sel" id="u-st">
-            <option>Registered</option><option>In Transit</option><option>Arrived at Branch</option>
-            <option>Out for Delivery</option><option>Delivered</option><option>Delayed</option>
-            <option>Returned</option><option>Lost</option>
+            <option>Registered</option>
+            <option>In Transit</option>
+            <option>Arrived at Branch</option>
+            <option>Out for Delivery</option>
+            <option>Delivered</option>
+            <option>Delayed</option>
+            <option>Returned</option>
+            <option>Lost</option>
           </select>
         </div>
-        <div class="ff"><label class="lbl r">Current Location</label>
+        <div class="ff">
+          <label class="lbl r" for="u-loc">Current Location</label>
           <select class="inp sel" id="u-loc">
-            <option>Gaborone Main</option><option>Francistown Hub</option><option>Maun Branch</option>
-            <option>Kasane Branch</option><option>Serowe Branch</option><option>In Transit — Route</option>
+            <option>Gaborone Main</option>
+            <option>Francistown Hub</option>
+            <option>Maun Branch</option>
+            <option>Kasane Branch</option>
+            <option>Serowe Branch</option>
+            <option>In Transit — Route</option>
           </select>
         </div>
-        <div class="ff full"><label class="lbl">Notes</label><textarea class="inp" id="u-notes" placeholder="Optional notes…"></textarea></div>
+        <div class="ff full">
+          <label class="lbl" for="u-notes">Notes (optional)</label>
+          <textarea class="inp" id="u-notes" placeholder="Optional notes about this update…"></textarea>
+        </div>
       </div>
-      <div style="margin-top:18px;display:flex;gap:10px">
+      <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-gold" id="u-btn" onclick="doUpdate()">Update Status →</button>
         <button class="btn btn-ghost" onclick="clearUpd()">Cancel</button>
       </div>
@@ -373,492 +1580,986 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
   </div>
 </div>
 
-<!-- CONFIRM DELIVERY -->
+<!-- CONFIRM DELIVERY ──────────────────────────────────────────────────────── -->
 <div class="page" id="page-delivery">
   <div class="pg-hdr">
-    <div class="bc">Dashboard › <span>Confirm Delivery</span></div>
-    <h1>Confirm Parcel Delivery</h1><p>Record delivery confirmation with recipient details</p>
+    <div class="bc"><span>Dashboard</span> › <span>Confirm Delivery</span></div>
+    <h1>Confirm Parcel Delivery</h1>
+    <p>Record delivery confirmation with recipient details and confirmation code</p>
   </div>
   <div class="card">
-    <div class="fg">
-      <div class="sec">Parcel Identification</div>
-      <div class="ff"><label class="lbl r">Tracking Number</label><input class="inp std" id="d-tn" placeholder="BP-2026-XXXXXX"/></div>
-      <div class="sec">Recipient Confirmation</div>
-      <div class="ff"><label class="lbl r">Receiver Name</label><input class="inp std" id="d-rn" placeholder="Name of person who collected"/></div>
-      <div class="ff"><label class="lbl r">Receiver Phone</label><input class="inp std" id="d-rp" placeholder="+267 7X XXX XXX"/></div>
-      <div class="ff"><label class="lbl r">Confirmation Code</label><input class="inp std" id="d-cc" placeholder="Code provided by receiver"/></div>
-      <div class="ff full"><label class="lbl">Delivery Notes</label><textarea class="inp" id="d-no" placeholder="Any notes about the delivery…"></textarea></div>
+    <form onsubmit="event.preventDefault();confirmDelivery()" novalidate>
+      <div class="fg">
+        <div class="sec">Parcel Identification</div>
+        <div class="ff">
+          <label class="lbl r" for="d-tn">Tracking Number</label>
+          <input class="inp std" id="d-tn" type="text" placeholder="BP-2026-XXXXXX" required />
+        </div>
+
+        <div class="sec">Recipient Confirmation</div>
+        <div class="ff">
+          <label class="lbl r" for="d-rn">Receiver Name</label>
+          <input class="inp std" id="d-rn" type="text" placeholder="Name of person who collected" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="d-rp">Receiver Phone</label>
+          <input class="inp std" id="d-rp" type="tel" placeholder="+267 7X XXX XXX" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="d-cc">Confirmation Code</label>
+          <input class="inp std" id="d-cc" type="text" placeholder="Code provided by receiver" required />
+        </div>
+        <div class="ff full">
+          <label class="lbl" for="d-no">Delivery Notes</label>
+          <textarea class="inp" id="d-no" placeholder="Any notes about the delivery…"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:24px">
+        <button class="btn btn-gold" id="d-btn" type="submit">Confirm Delivery →</button>
+      </div>
+    </form>
+    <div class="sbox" id="d-ok" role="status">
+      <h3>✓ Delivery Confirmed</h3>
+      <p id="d-ok-msg"></p>
     </div>
-    <div style="margin-top:20px"><button class="btn btn-gold" id="d-btn" onclick="confirmDelivery()">Confirm Delivery →</button></div>
-    <div class="sbox" id="d-ok"><h3>✓ Delivery Confirmed</h3><p id="d-ok-msg"></p></div>
   </div>
 </div>
 
-<!-- SEARCH -->
+<!-- SEARCH ────────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-search">
   <div class="pg-hdr">
-    <div class="bc">Dashboard › <span>Search Parcel</span></div>
-    <h1>Search Parcels</h1><p>Search by tracking number</p>
+    <div class="bc"><span>Dashboard</span> › <span>Search</span></div>
+    <h1>Search Parcels</h1>
+    <p>Search by tracking number or part of a tracking number</p>
   </div>
   <div class="card">
-    <div class="row" style="max-width:500px;margin-bottom:18px">
-      <div class="inp-wrap"><span class="inp-icon">⬡</span>
-        <input class="inp" id="sr-inp" placeholder="Enter tracking number or part of it" onkeydown="if(event.key==='Enter')doSearch()"/>
+    <div class="row" style="max-width:520px;margin-bottom:20px">
+      <div class="inp-wrap">
+        <span class="inp-icon" aria-hidden="true">⬡</span>
+        <label for="sr-inp" class="sr-only">Search tracking number</label>
+        <input class="inp" id="sr-inp" type="text" placeholder="Enter tracking number or part of it" onkeydown="if(event.key==='Enter') doSearch()" />
       </div>
       <button class="btn btn-blue" onclick="doSearch()">Search</button>
     </div>
-    <div id="sr-res"></div>
+    <div id="sr-res" aria-live="polite"></div>
   </div>
 </div>
 
-<!-- ENQUIRY PUBLIC -->
+<!-- ENQUIRY (PUBLIC) ──────────────────────────────────────────────────────── -->
 <div class="page" id="page-enquiry">
   <div class="pg-hdr">
-    <div class="bc">Home › <span>Submit Enquiry</span></div>
-    <h1>Customer Enquiry</h1><p>Having an issue with your parcel? We'll assist you.</p>
+    <div class="bc"><span>Home</span> › <span>Submit Enquiry</span></div>
+    <h1>Customer Enquiry</h1>
+    <p>Having an issue with your parcel? Submit an enquiry and our staff will assist you.</p>
   </div>
-  <div class="card" style="max-width:660px">
-    <div class="fg">
-      <div class="ff"><label class="lbl r">Tracking Number</label><input class="inp std" id="eq-tn" placeholder="BP-2026-XXXXXX"/></div>
-      <div class="ff"><label class="lbl r">Enquiry Type</label>
-        <select class="inp sel" id="eq-ty"><option value="">Select type…</option>
-          <option>Delayed Parcel</option><option>Missing Parcel</option>
-          <option>Damaged Parcel</option><option>Wrong Tracking Information</option><option>Other</option>
-        </select>
+  <div class="card" style="max-width:680px">
+    <form onsubmit="event.preventDefault();submitEnquiry()" novalidate>
+      <div class="fg">
+        <div class="ff">
+          <label class="lbl r" for="eq-tn">Tracking Number</label>
+          <input class="inp std" id="eq-tn" type="text" placeholder="BP-2026-XXXXXX" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="eq-ty">Enquiry Type</label>
+          <select class="inp sel" id="eq-ty" required>
+            <option value="">Select type…</option>
+            <option>Delayed Parcel</option>
+            <option>Missing Parcel</option>
+            <option>Damaged Parcel</option>
+            <option>Wrong Tracking Information</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="eq-nm">Your Full Name</label>
+          <input class="inp std" id="eq-nm" type="text" placeholder="Full name" required />
+        </div>
+        <div class="ff">
+          <label class="lbl r" for="eq-ph">Phone Number</label>
+          <input class="inp std" id="eq-ph" type="tel" placeholder="+267 7X XXX XXX" required />
+        </div>
+        <div class="ff full">
+          <label class="lbl" for="eq-em">Email Address</label>
+          <input class="inp std" id="eq-em" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="ff full">
+          <label class="lbl r" for="eq-ms">Message</label>
+          <textarea class="inp" id="eq-ms" placeholder="Describe your issue in detail…" style="min-height:110px" required></textarea>
+        </div>
       </div>
-      <div class="ff"><label class="lbl r">Your Full Name</label><input class="inp std" id="eq-nm" placeholder="Full name"/></div>
-      <div class="ff"><label class="lbl r">Phone Number</label><input class="inp std" id="eq-ph" placeholder="+267 7X XXX XXX"/></div>
-      <div class="ff full"><label class="lbl">Email Address</label><input class="inp std" id="eq-em" type="email" placeholder="your@email.com"/></div>
-      <div class="ff full"><label class="lbl r">Message</label><textarea class="inp" id="eq-ms" placeholder="Describe your issue in detail…" style="min-height:100px"></textarea></div>
+      <div style="margin-top:24px">
+        <button class="btn btn-gold" id="eq-btn" type="submit">Submit Enquiry →</button>
+      </div>
+    </form>
+    <div class="sbox" id="eq-ok" role="status">
+      <h3>✓ Enquiry Submitted Successfully</h3>
+      <p>Your enquiry has been submitted. BotswanaPost staff will review it and contact you shortly.</p>
     </div>
-    <div style="margin-top:20px"><button class="btn btn-gold" id="eq-btn" onclick="submitEnquiry()">Submit Enquiry →</button></div>
-    <div class="sbox" id="eq-ok"><h3>✓ Enquiry Submitted Successfully</h3><p>Your enquiry has been submitted. BotswanaPost staff will review it and contact you shortly.</p></div>
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
+<!-- ADMIN DASHBOARD ───────────────────────────────────────────────────────── -->
 <div class="page" id="page-adash">
-  <div class="pg-hdr"><h1>Administrator Dashboard</h1><p>System overview and management</p></div>
-  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
-    <div class="stat"><div class="stat-n" id="ad-to">—</div><div class="stat-l">Total Parcels</div></div>
-    <div class="stat"><div class="stat-n" id="ad-de">—</div><div class="stat-l">Delivered</div></div>
-    <div class="stat"><div class="stat-n" id="ad-dl">—</div><div class="stat-l">Delayed</div></div>
-    <div class="stat"><div class="stat-n" id="ad-rt">—</div><div class="stat-l">Returned</div></div>
-    <div class="stat"><div class="stat-n" id="ad-eq">—</div><div class="stat-l">Enquiries</div></div>
-    <div class="stat"><div class="stat-n" id="ad-st">—</div><div class="stat-l">Staff Accounts</div></div>
+  <div class="pg-hdr">
+    <h1>Administrator Dashboard</h1>
+    <p>System overview — all parcels, staff, and activity</p>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+    <div class="stat"><span class="stat-icon">📦</span><div class="stat-n" id="ad-to">—</div><div class="stat-l">Total Parcels</div></div>
+    <div class="stat"><span class="stat-icon">✅</span><div class="stat-n" id="ad-de">—</div><div class="stat-l">Delivered</div></div>
+    <div class="stat"><span class="stat-icon">⏱</span><div class="stat-n" id="ad-dl">—</div><div class="stat-l">Delayed</div></div>
+    <div class="stat"><span class="stat-icon">↩️</span><div class="stat-n" id="ad-rt">—</div><div class="stat-l">Returned</div></div>
+    <div class="stat"><span class="stat-icon">✉️</span><div class="stat-n" id="ad-eq">—</div><div class="stat-l">Enquiries</div></div>
+    <div class="stat"><span class="stat-icon">👥</span><div class="stat-n" id="ad-st">—</div><div class="stat-l">Staff Accounts</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="admin-grid">
     <div class="card">
       <div class="card-title">Quick Actions</div>
       <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-ghost" onclick="nav('accounts')" style="justify-content:flex-start;font-size:13px">👥 Manage Staff Accounts</button>
-        <button class="btn btn-ghost" onclick="nav('reports')" style="justify-content:flex-start;font-size:13px">📊 Generate Reports</button>
-        <button class="btn btn-ghost" onclick="nav('enq-admin')" style="justify-content:flex-start;font-size:13px">📋 View Enquiries</button>
-        <button class="btn btn-ghost" onclick="nav('audit')" style="justify-content:flex-start;font-size:13px">🔍 Audit Logs</button>
+        <button class="btn btn-ghost btn-sm" onclick="nav('accounts')" style="justify-content:flex-start">👥 Manage Staff Accounts</button>
+        <button class="btn btn-ghost btn-sm" onclick="nav('reports')"  style="justify-content:flex-start">📊 Generate Reports</button>
+        <button class="btn btn-ghost btn-sm" onclick="nav('enq-admin')"style="justify-content:flex-start">📋 View Enquiries</button>
+        <button class="btn btn-ghost btn-sm" onclick="nav('audit')"    style="justify-content:flex-start">🔍 Audit Logs</button>
       </div>
     </div>
     <div class="card">
       <div class="card-title">Recent Audit Activity</div>
-      <div id="ad-log" style="font-size:12px;color:var(--text-dim)">Loading…</div>
+      <div id="ad-log" style="font-size:13px;color:var(--text-dim)">Loading…</div>
     </div>
   </div>
 </div>
 
-<!-- STAFF ACCOUNTS -->
+<!-- STAFF ACCOUNTS ────────────────────────────────────────────────────────── -->
 <div class="page" id="page-accounts">
   <div class="pg-hdr">
-    <div class="bc">Admin › <span>Staff Accounts</span></div>
-    <h1>Staff Accounts</h1><p>Manage staff and administrator accounts</p>
+    <div class="bc"><span>Admin</span> › <span>Staff Accounts</span></div>
+    <h1>Staff Accounts</h1>
+    <p>Manage staff and administrator accounts</p>
   </div>
   <div class="card">
     <div class="card-hdr">
       <div class="card-title" style="margin-bottom:0">All Accounts</div>
       <button class="btn btn-gold btn-sm" onclick="openModal('m-staff')">+ Create Account</button>
     </div>
-    <div class="tw"><table>
-      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Branch</th><th>Status</th><th>Action</th></tr></thead>
-      <tbody id="ac-rows"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr></tbody>
-    </table></div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Branch</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody id="ac-rows">
+          <tr><td colspan="6"><div class="empty-state"><span class="empty-icon">⏳</span><p>Loading accounts…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- REPORTS -->
+<!-- REPORTS ───────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-reports">
   <div class="pg-hdr">
-    <div class="bc">Admin › <span>Reports</span></div>
-    <h1>Reports</h1><p>Generate and export parcel activity reports</p>
+    <div class="bc"><span>Admin</span> › <span>Reports</span></div>
+    <h1>Reports</h1>
+    <p>Generate and export parcel activity reports with date filters</p>
   </div>
   <div class="card">
     <div class="card-title">Generate Report</div>
-    <div class="fg" style="max-width:580px">
-      <div class="ff"><label class="lbl">Report Type</label>
+    <div class="fg" style="max-width:600px">
+      <div class="ff">
+        <label class="lbl" for="rp-ty">Report Type</label>
         <select class="inp sel" id="rp-ty">
-          <option>Parcels by Status</option><option>Daily Registration Report</option>
-          <option>Delivery Performance</option><option>Delayed & Returned</option><option>Enquiries Summary</option>
+          <option>Parcels by Status</option>
+          <option>Daily Registration Report</option>
+          <option>Delivery Performance</option>
+          <option>Delayed &amp; Returned</option>
+          <option>Enquiries Summary</option>
         </select>
       </div>
-      <div class="ff"><label class="lbl">Date From</label><input class="inp std" id="rp-fr" type="date"/></div>
-      <div class="ff"><label class="lbl">Date To</label><input class="inp std" id="rp-to" type="date"/></div>
+      <div class="ff">
+        <label class="lbl" for="rp-fr">Date From</label>
+        <input class="inp std" id="rp-fr" type="date" />
+      </div>
+      <div class="ff">
+        <label class="lbl" for="rp-to">Date To</label>
+        <input class="inp std" id="rp-to" type="date" />
+      </div>
     </div>
-    <div style="margin-top:18px;display:flex;gap:10px">
-      <button class="btn btn-blue" onclick="genReport()">Generate Report</button>
-      <button class="btn btn-ghost" onclick="exportCSV()">Export CSV</button>
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-blue" onclick="genReport()">📊 Generate Report</button>
+      <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
     </div>
   </div>
   <div class="card" id="rp-res" style="display:none">
     <div class="card-title" id="rp-ttl"></div>
-    <div class="tw"><table><thead id="rp-th"></thead><tbody id="rp-tb"></tbody></table></div>
-  </div>
-</div>
-
-<!-- ENQUIRIES ADMIN -->
-<div class="page" id="page-enq-admin">
-  <div class="pg-hdr">
-    <div class="bc">Admin › <span>Enquiries</span></div>
-    <h1>Customer Enquiries</h1><p>Review all submitted customer enquiries</p>
-  </div>
-  <div class="card">
-    <div class="tw"><table>
-      <thead><tr><th>Date</th><th>Tracking #</th><th>Customer</th><th>Type</th><th>Phone</th><th>Message</th></tr></thead>
-      <tbody id="eq-rows"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
-
-<!-- AUDIT LOGS -->
-<div class="page" id="page-audit">
-  <div class="pg-hdr">
-    <div class="bc">Admin › <span>Audit Logs</span></div>
-    <h1>Audit Logs</h1><p>All staff actions are recorded here</p>
-  </div>
-  <div class="card">
-    <div class="tw"><table>
-      <thead><tr><th>Date / Time</th><th>User</th><th>Action</th><th>Record</th><th>Description</th></tr></thead>
-      <tbody id="al-rows"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr></tbody>
-    </table></div>
-  </div>
-</div>
-
-</main>
-</div>
-
-<!-- MODAL: CREATE STAFF -->
-<div class="modal-bg" id="m-staff">
-  <div class="modal">
-    <button class="mc" onclick="closeModal('m-staff')">✕</button>
-    <h3>Create Staff Account</h3>
-    <p>The account record will be added to the staff table.</p>
-    <div style="display:flex;flex-direction:column;gap:13px">
-      <div class="ff"><label class="lbl r">Full Name</label><input class="inp std" id="cs-n" placeholder="Full name"/></div>
-      <div class="ff"><label class="lbl r">Email</label><input class="inp std" id="cs-e" type="email" placeholder="staff@botswanapost.co.bw"/></div>
-      <div class="ff"><label class="lbl r">Temporary Password</label><input class="inp std" id="cs-p" type="password" placeholder="Min 8 characters"/></div>
-      <div class="ff"><label class="lbl r">Role</label>
-        <select class="inp sel" id="cs-r"><option value="Staff">Staff</option><option value="Administrator">Administrator</option></select>
-      </div>
-      <div class="ff"><label class="lbl">Branch</label>
-        <select class="inp sel" id="cs-b"><option>Gaborone Main</option><option>Francistown Hub</option><option>Maun Branch</option><option>Kasane Branch</option><option>Serowe Branch</option></select>
-      </div>
-      <button class="btn btn-gold" onclick="createStaff()">Create Account →</button>
+    <div class="tw">
+      <table>
+        <thead id="rp-th"></thead>
+        <tbody id="rp-tb"></tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- ENQUIRIES ADMIN ───────────────────────────────────────────────────────── -->
+<div class="page" id="page-enq-admin">
+  <div class="pg-hdr">
+    <div class="bc"><span>Admin</span> › <span>Enquiries</span></div>
+    <h1>Customer Enquiries</h1>
+    <p>Review all submitted customer enquiries</p>
+  </div>
+  <div class="card">
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Tracking #</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Type</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Message</th>
+          </tr>
+        </thead>
+        <tbody id="eq-rows">
+          <tr><td colspan="6"><div class="empty-state"><span class="empty-icon">⏳</span><p>Loading enquiries…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
+<!-- AUDIT LOGS ────────────────────────────────────────────────────────────── -->
+<div class="page" id="page-audit">
+  <div class="pg-hdr">
+    <div class="bc"><span>Admin</span> › <span>Audit Logs</span></div>
+    <h1>Audit Logs</h1>
+    <p>All staff and administrator actions are recorded here automatically</p>
+  </div>
+  <div class="card">
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Date / Time</th>
+            <th scope="col">User</th>
+            <th scope="col">Action</th>
+            <th scope="col">Record</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody id="al-rows">
+          <tr><td colspan="5"><div class="empty-state"><span class="empty-icon">⏳</span><p>Loading audit logs…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">© 2026 BotswanaPost · Parcel Tracking & Management System</span>
+    <div class="footer-links">
+      <a onclick="nav('track')">Track Parcel</a>
+      <a onclick="nav('enquiry')">Submit Enquiry</a>
+      <a onclick="nav('login')">Staff Login</a>
+    </div>
+  </div>
+</footer>
+</div>
+
+<!-- ═══ MODAL: CREATE STAFF ════════════════════════════════════════════════ -->
+<div class="modal-bg" id="m-staff" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <button class="mc" onclick="closeModal('m-staff')" aria-label="Close modal">✕</button>
+    <h3 id="modal-title">Create Staff Account</h3>
+    <p>Add a new staff or administrator account to the system.</p>
+    <form onsubmit="event.preventDefault();createStaff()" novalidate style="display:flex;flex-direction:column;gap:14px">
+      <div class="ff">
+        <label class="lbl r" for="cs-n">Full Name</label>
+        <input class="inp std" id="cs-n" type="text" placeholder="Full name" required />
+      </div>
+      <div class="ff">
+        <label class="lbl r" for="cs-e">Email Address</label>
+        <input class="inp std" id="cs-e" type="email" placeholder="staff@botswanapost.co.bw" required />
+      </div>
+      <div class="ff">
+        <label class="lbl r" for="cs-p">Password</label>
+        <input class="inp std" id="cs-p" type="password" placeholder="Min 6 characters" required />
+      </div>
+      <div class="ff">
+        <label class="lbl r" for="cs-r">Role</label>
+        <select class="inp sel" id="cs-r" required>
+          <option value="Staff">Staff</option>
+          <option value="Administrator">Administrator</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label class="lbl" for="cs-b">Branch</label>
+        <select class="inp sel" id="cs-b">
+          <option>Gaborone Main</option>
+          <option>Francistown Hub</option>
+          <option>Maun Branch</option>
+          <option>Kasane Branch</option>
+          <option>Serowe Branch</option>
+        </select>
+      </div>
+      <button class="btn btn-gold" type="submit">Create Account →</button>
+    </form>
+  </div>
+</div>
+
+<!-- Screen-reader only helper class -->
+<style>
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>
+
+<div id="toast" role="alert" aria-live="assertive"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+   JAVASCRIPT
+═══════════════════════════════════════════════════════════════════════════ -->
 <script>
-const SURL='https://kgfmiufvaarsgxznjork.supabase.co';
-const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnZm1pdWZ2YWFyc2d4em5qb3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MzY4NDcsImV4cCI6MjA5MzIxMjg0N30.zyZtOv36m0iqLFPwR2dlyWwdLDdQeBkZefR_x9uYcAY';
-const db=supabase.createClient(SURL,SKEY);
-let cUser=null,cRole=null,dbOK=false,fPId=null;
+const SURL = 'https://kgfmiufvaarsgxznjork.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnZm1pdWZ2YWFyc2d4em5qb3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MzY4NDcsImV4cCI6MjA5MzIxMjg0N30.zyZtOv36m0iqLFPwR2dlyWwdLDdQeBkZefR_x9uYcAY';
+const db = supabase.createClient(SURL, SKEY);
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-(async()=>{
-  try{const{error}=await db.from('parcels').select('id',{count:'exact',head:true});dbOK=!error;}catch{dbOK=false;}
-  document.getElementById('db-dot').className='db-dot'+(dbOK?' ok':'');
-  document.getElementById('db-txt').textContent=dbOK?'DB Connected':'DB Offline';
+let cUser = null, cRole = null, dbOK = false, fPId = null;
+
+/* ── INIT ─────────────────────────────────────────────────────────────── */
+(async () => {
+  try {
+    const { error } = await db.from('parcels').select('id', { count: 'exact', head: true });
+    dbOK = !error;
+  } catch { dbOK = false; }
+
+  const dot = document.getElementById('db-dot');
+  const txt = document.getElementById('db-txt');
+  dot.className = 'db-dot' + (dbOK ? ' ok' : '');
+  txt.textContent = dbOK ? 'DB Connected' : 'DB Offline';
+
   // Restore session from localStorage
-  const saved=localStorage.getItem('bp_staff');
-  if(saved){try{const d=JSON.parse(saved);if(d&&d.email)applySession(d);}catch{localStorage.removeItem('bp_staff');}}
+  const saved = localStorage.getItem('bp_staff');
+  if (saved) {
+    try {
+      const d = JSON.parse(saved);
+      if (d && d.email) applySession(d);
+    } catch { localStorage.removeItem('bp_staff'); }
+  }
 })();
 
-function applySession(data){
-  cUser={email:data.email};cRole=data.role;
-  document.getElementById('pub-nav').style.display='none';
-  document.getElementById('staff-nav').style.display=cRole==='Staff'?'flex':'none';
-  document.getElementById('admin-nav').style.display=cRole==='Administrator'?'flex':'none';
-  document.getElementById('user-area').style.display='flex';
-  document.getElementById('hdr-av').textContent=(data.full_name||'U').charAt(0).toUpperCase();
-  document.getElementById('hdr-nm').textContent=data.full_name||'';
-  document.getElementById('sw-msg').textContent='Welcome back, '+(data.full_name||'')+' — '+(data.branch||'');
-  nav(cRole==='Administrator'?'adash':'sdash');
+function applySession(data) {
+  cUser = { email: data.email };
+  cRole = data.role;
+  document.getElementById('pub-nav').style.display   = 'none';
+  document.getElementById('staff-nav').style.display = cRole === 'Staff' ? 'flex' : 'none';
+  document.getElementById('admin-nav').style.display  = cRole === 'Administrator' ? 'flex' : 'none';
+  document.getElementById('user-area').style.display  = 'flex';
+  document.getElementById('hdr-av').textContent = (data.full_name || 'U').charAt(0).toUpperCase();
+  document.getElementById('hdr-nm').textContent = data.full_name || '';
+  document.getElementById('sw-msg').textContent = 'Welcome back, ' + (data.full_name || '') + ' — ' + (data.branch || '');
+  updateMobileNav();
+  nav(cRole === 'Administrator' ? 'adash' : 'sdash');
 }
 
-function onOut(){
-  cUser=null;cRole=null;
+function updateMobileNav() {
+  const isStaff = !!cUser;
+  const isAdmin = cRole === 'Administrator';
+  document.querySelectorAll('.staff-hidden').forEach(el => el.style.display = isStaff ? 'none' : '');
+  document.querySelectorAll('.staff-only').forEach(el  => el.style.display = isStaff && !isAdmin ? '' : 'none');
+  document.querySelectorAll('.admin-only').forEach(el  => el.style.display = isAdmin ? '' : 'none');
+}
+
+function onOut() {
+  cUser = null; cRole = null;
   localStorage.removeItem('bp_staff');
-  document.getElementById('pub-nav').style.display='flex';
-  document.getElementById('staff-nav').style.display='none';
-  document.getElementById('admin-nav').style.display='none';
-  document.getElementById('user-area').style.display='none';
+  document.getElementById('pub-nav').style.display   = 'flex';
+  document.getElementById('staff-nav').style.display = 'none';
+  document.getElementById('admin-nav').style.display  = 'none';
+  document.getElementById('user-area').style.display  = 'none';
+  updateMobileNav();
   nav('home');
 }
 
-// ── NAV ───────────────────────────────────────────────────────────────────────
-function nav(p){
-  const staffP=['sdash','register','update','delivery','search'];
-  const adminP=['adash','accounts','reports','enq-admin','audit'];
-  if(staffP.includes(p)&&!cUser){nav('login');return;}
-  if(adminP.includes(p)&&cRole!=='Administrator'){nav('login');return;}
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  const el=document.getElementById('page-'+p);
-  if(el)el.classList.add('active');
-  window.scrollTo(0,0);
-  if(p==='sdash')loadSDash();
-  if(p==='adash')loadADash();
-  if(p==='accounts')loadAccounts();
-  if(p==='enq-admin')loadEnquiries();
-  if(p==='audit')loadAudit();
+/* ── MOBILE DRAWER ────────────────────────────────────────────────────── */
+function toggleDrawer() {
+  const d = document.getElementById('mobile-drawer');
+  const btn = document.getElementById('ham-btn');
+  const open = d.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open);
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmtDt(s){return s?new Date(s).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';}
-function fmtD(s){return s?new Date(s).toLocaleDateString('en-GB'):'—';}
-function genTN(){return'BP-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*899999)+100000);}
-function sc(s){const m={'Registered':'s-reg','In Transit':'s-tr','Arrived at Branch':'s-ar','Out for Delivery':'s-od','Delivered':'s-de','Delayed':'s-dl','Returned':'s-rt','Lost':'s-lo'};return m[s]||'s-reg';}
-function toast(m,t='success'){const el=document.getElementById('toast');el.textContent=m;el.className='show '+t;setTimeout(()=>el.className='',3500);}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-async function audit(action,rec,desc){if(!cUser)return;try{await db.from('audit_logs').insert({user_email:cUser.email,action,record_affected:rec,description:desc,created_at:new Date().toISOString()});}catch{}}
+function closeDrawer() {
+  document.getElementById('mobile-drawer').classList.remove('open');
+  document.getElementById('ham-btn').setAttribute('aria-expanded', 'false');
+}
 
-// ── AUTH (direct staff table — no Supabase Auth required) ────────────────────
-async function doLogin(){
-  const em=document.getElementById('l-email').value.trim().toLowerCase();
-  const pw=document.getElementById('l-pass').value;
-  const err=document.getElementById('l-err');
-  const btn=document.getElementById('l-btn');
-  err.style.display='none';
-  if(!em||!pw){err.textContent='Please enter email and password.';err.style.display='block';return;}
-  btn.disabled=true;btn.textContent='Signing in…';
-  // Query staff table directly by email + password
-  const{data,error}=await db.from('staff').select('*').eq('email',em).eq('password',pw).single();
-  if(error||!data){
-    err.textContent='Invalid email or password. Please try again.';err.style.display='block';
-    btn.disabled=false;btn.textContent='Sign In →';return;
+/* ── NAVIGATION ──────────────────────────────────────────────────────── */
+function nav(p) {
+  const staffP = ['sdash','register','update','delivery','search'];
+  const adminP = ['adash','accounts','reports','enq-admin','audit'];
+  if (staffP.includes(p) && !cUser) { nav('login'); return; }
+  if (adminP.includes(p) && cRole !== 'Administrator') { nav('login'); return; }
+
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  const el = document.getElementById('page-' + p);
+  if (el) el.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (p === 'sdash')     loadSDash();
+  if (p === 'adash')     loadADash();
+  if (p === 'accounts')  loadAccounts();
+  if (p === 'enq-admin') loadEnquiries();
+  if (p === 'audit')     loadAudit();
+}
+
+/* ── HELPERS ──────────────────────────────────────────────────────────── */
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDt(s) { return s ? new Date(s).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'; }
+function fmtD(s)  { return s ? new Date(s).toLocaleDateString('en-GB') : '—'; }
+function genTN()  { return 'BP-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*899999)+100000); }
+function v(id)    { return document.getElementById(id)?.value?.trim() || ''; }
+function sv(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+
+function sc(s) {
+  const m = {
+    'Registered':'s-reg', 'In Transit':'s-tr', 'Arrived at Branch':'s-ar',
+    'Out for Delivery':'s-od', 'Delivered':'s-de', 'Delayed':'s-dl',
+    'Returned':'s-rt', 'Lost':'s-lo'
+  };
+  return m[s] || 's-reg';
+}
+
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  setTimeout(() => { el.className = ''; }, 3800);
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open');    }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function audit(action, rec, desc) {
+  if (!cUser) return;
+  try {
+    await db.from('audit_logs').insert({
+      user_email: cUser.email,
+      action, record_affected: rec, description: desc,
+      created_at: new Date().toISOString()
+    });
+  } catch {}
+}
+
+function emptyRow(cols, msg, icon = '📭') {
+  return `<tr><td colspan="${cols}">
+    <div class="empty-state">
+      <span class="empty-icon">${icon}</span>
+      <p>${msg}</p>
+    </div>
+  </td></tr>`;
+}
+
+/* ── AUTH ─────────────────────────────────────────────────────────────── */
+async function doLogin() {
+  const em  = document.getElementById('l-email').value.trim().toLowerCase();
+  const pw  = document.getElementById('l-pass').value;
+  const err = document.getElementById('l-err');
+  const btn = document.getElementById('l-btn');
+
+  err.style.display = 'none';
+  if (!em || !pw) {
+    err.innerHTML = '⚠ Please enter your email and password.';
+    err.style.display = 'flex'; return;
   }
-  if(data.status==='Inactive'){
-    err.textContent='This account has been deactivated. Contact your administrator.';err.style.display='block';
-    btn.disabled=false;btn.textContent='Sign In →';return;
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  const { data, error } = await db.from('staff').select('*').eq('email', em).eq('password', pw).single();
+
+  if (error || !data) {
+    err.innerHTML = '⚠ Invalid email or password. Please try again.';
+    err.style.display = 'flex';
+    btn.disabled = false; btn.textContent = 'Sign In →'; return;
   }
-  // Save session to localStorage
-  localStorage.setItem('bp_staff',JSON.stringify({email:data.email,role:data.role,full_name:data.full_name,branch:data.branch}));
+
+  if (data.status === 'Inactive') {
+    err.innerHTML = '⚠ This account has been deactivated. Contact your administrator.';
+    err.style.display = 'flex';
+    btn.disabled = false; btn.textContent = 'Sign In →'; return;
+  }
+
+  localStorage.setItem('bp_staff', JSON.stringify({
+    email: data.email, role: data.role,
+    full_name: data.full_name, branch: data.branch
+  }));
+
   applySession(data);
-  btn.disabled=false;btn.textContent='Sign In →';
+  toast('Welcome back, ' + data.full_name + '!', 'success');
+  btn.disabled = false; btn.textContent = 'Sign In →';
 }
-function doLogout(){onOut();toast('Signed out successfully.','success');}
 
-// ── TRACKING ──────────────────────────────────────────────────────────────────
-function homeTrack(){const v=document.getElementById('h-inp').value.trim();if(!v){toast('Please enter a tracking number.','error');return;}document.getElementById('t-inp').value=v;nav('track');doTrack();}
+function doLogout() {
+  onOut();
+  toast('Signed out successfully.', 'success');
+}
 
-async function doTrack(){
-  const num=document.getElementById('t-inp').value.trim().toUpperCase();
-  const res=document.getElementById('t-res');
-  const btn=document.getElementById('t-btn');
-  if(!num){toast('Please enter a tracking number.','error');return;}
-  btn.disabled=true;btn.textContent='Searching…';
-  res.innerHTML='<div class="card" style="height:100px;opacity:.3"></div>';
-  let parcel=null;
-  if(dbOK){const{data}=await db.from('parcels').select('*').ilike('tracking_number',num).single();parcel=data;}
-  btn.disabled=false;btn.textContent='Search';
-  if(!parcel){res.innerHTML=`<div class="card" style="border-color:rgba(196,64,64,.3);text-align:center;padding:44px"><div style="font-size:30px;margin-bottom:10px">⚠</div><p style="color:var(--text-dim)">No parcel found for <strong style="color:var(--cream)">${esc(num)}</strong>.<br>Please check the tracking number.</p></div>`;return;}
-  let hist=[];
-  if(dbOK){const{data:h}=await db.from('parcel_history').select('*').eq('parcel_id',parcel.id).order('created_at',{ascending:true});hist=h||[];}
-  const tlHTML=hist.map((h,i)=>{const cls=i===hist.length-1?'cur':'done';return`<li class="tli ${cls}"><div class="tli-dc"><div class="tli-dot"></div><div class="tli-line"></div></div><div><div class="tl-ev">${esc(h.event)}</div><div class="tl-loc">${esc(h.location)}</div><div class="tl-t">${fmtDt(h.created_at)}</div></div></li>`;}).join('');
-  res.innerHTML=`<div class="card">
-    <div class="live-badge">● Live from Supabase database</div>
-    <div class="ph"><div class="pm"><h2>${esc(parcel.tracking_number)}</h2><p>${esc(parcel.origin_branch)} → ${esc(parcel.destination_branch)} · ${esc(parcel.parcel_type||'')}</p></div><span class="sp ${sc(parcel.status)}">${esc(parcel.status)}</span></div>
+/* ── TRACKING ─────────────────────────────────────────────────────────── */
+function homeTrack() {
+  const val = document.getElementById('h-inp').value.trim();
+  if (!val) { toast('Please enter a tracking number.', 'error'); return; }
+  document.getElementById('t-inp').value = val;
+  nav('track');
+  doTrack();
+}
+
+async function doTrack() {
+  const num = document.getElementById('t-inp').value.trim().toUpperCase();
+  const res = document.getElementById('t-res');
+  const btn = document.getElementById('t-btn');
+  if (!num) { toast('Please enter a tracking number.', 'error'); return; }
+
+  btn.disabled = true; btn.textContent = 'Searching…';
+  res.innerHTML = `<div class="card" style="opacity:.3;height:120px;border-color:var(--border-b)"></div>`;
+
+  let parcel = null;
+  if (dbOK) {
+    const { data } = await db.from('parcels').select('*').ilike('tracking_number', num).single();
+    parcel = data;
+  }
+
+  btn.disabled = false; btn.textContent = 'Search';
+
+  if (!parcel) {
+    res.innerHTML = `<div class="card" style="border-color:rgba(196,64,64,.3);text-align:center;padding:52px 24px">
+      <div style="font-size:36px;margin-bottom:14px">🔍</div>
+      <h3 style="color:var(--cream);font-size:17px;margin-bottom:8px">No parcel found</h3>
+      <p style="color:var(--text-dim);font-size:14px">No parcel found for <strong style="color:var(--cream)">${esc(num)}</strong>.<br>Please check the tracking number and try again.</p>
+    </div>`;
+    return;
+  }
+
+  let hist = [];
+  if (dbOK) {
+    const { data: h } = await db.from('parcel_history').select('*').eq('parcel_id', parcel.id).order('created_at', { ascending: true });
+    hist = h || [];
+  }
+
+  const tlHTML = hist.map((h, i) => {
+    const cls = i === hist.length - 1 ? 'cur' : 'done';
+    return `<li class="tli ${cls}">
+      <div class="tli-dc"><div class="tli-dot"></div><div class="tli-line"></div></div>
+      <div>
+        <div class="tl-ev">${esc(h.event)}</div>
+        <div class="tl-loc">${esc(h.location || '')}</div>
+        <div class="tl-t">${fmtDt(h.created_at)}</div>
+      </div>
+    </li>`;
+  }).join('');
+
+  res.innerHTML = `<div class="card">
+    <div class="live-badge">● Live data from Supabase</div>
+    <div class="ph">
+      <div class="pm">
+        <h2>${esc(parcel.tracking_number)}</h2>
+        <p>${esc(parcel.origin_branch)} → ${esc(parcel.destination_branch)} · ${esc(parcel.parcel_type || '')}</p>
+      </div>
+      <span class="sp ${sc(parcel.status)}">${esc(parcel.status)}</span>
+    </div>
     <div class="info-g">
       <div class="ic"><label>Sender</label><p>${esc(parcel.sender_name)}</p></div>
       <div class="ic"><label>Origin</label><p>${esc(parcel.origin_branch)}</p></div>
       <div class="ic"><label>Receiver</label><p>${esc(parcel.receiver_name)}</p></div>
       <div class="ic"><label>Destination</label><p>${esc(parcel.destination_branch)}</p></div>
-      <div class="ic"><label>Weight</label><p>${esc(parcel.weight_kg)} kg</p></div>
-      <div class="ic"><label>Expected Delivery</label><p>${parcel.expected_delivery_date||'—'}</p></div>
+      <div class="ic"><label>Weight</label><p>${esc(String(parcel.weight_kg || '—'))} kg</p></div>
+      <div class="ic"><label>Expected Delivery</label><p>${parcel.expected_delivery_date || '—'}</p></div>
     </div>
-    ${tlHTML?`<div class="tl-hdr">Movement History</div><ul class="tl">${tlHTML}</ul>`:'<p style="color:var(--text-muted);font-size:12px">No movement history recorded yet.</p>'}
+    ${tlHTML
+      ? `<div class="tl-hdr">Movement History</div><ul class="tl">${tlHTML}</ul>`
+      : '<p style="color:var(--text-muted);font-size:13px">No movement history recorded yet.</p>'
+    }
   </div>`;
 }
 
-// ── REGISTER ──────────────────────────────────────────────────────────────────
-async function registerParcel(){
-  const f={sn:v('sn'),sp:v('sp'),rn:v('rn'),rp:v('rp'),po:v('po'),pd:v('pd'),pw:v('pw'),pd2:v('pd2')};
-  if(!f.sn||!f.sp||!f.rn||!f.rp||!f.po||!f.pd||!f.pw||!f.pd2){toast('Please fill all required fields.','error');return;}
-  if(f.po===f.pd){toast('Origin and destination cannot be the same.','error');return;}
-  const btn=document.getElementById('reg-btn');
-  btn.disabled=true;btn.textContent='Saving…';
-  const tn=genTN();
-  const rec={tracking_number:tn,sender_name:f.sn,sender_phone:f.sp,sender_email:v('se'),sender_address:v('sa'),receiver_name:f.rn,receiver_phone:f.rp,receiver_email:v('re'),receiver_address:v('ra'),origin_branch:f.po,destination_branch:f.pd,weight_kg:parseFloat(f.pw),parcel_type:v('pt'),parcel_description:f.pd2,expected_delivery_date:v('pe')||null,status:'Registered',registered_by:cUser?.email,created_at:new Date().toISOString()};
-  if(dbOK){
-    const{data,error}=await db.from('parcels').insert(rec).select().single();
-    if(error){toast('DB Error: '+error.message,'error');btn.disabled=false;btn.textContent='Register Parcel →';return;}
-    await db.from('parcel_history').insert({parcel_id:data.id,event:'Parcel Registered',location:f.po,status:'Registered',notes:'Registered by '+(cUser?.email||'staff'),created_at:new Date().toISOString()});
-    await audit('REGISTER_PARCEL',tn,'Registered parcel for '+f.sn+' → '+f.rn);
-    toast('Parcel registered successfully!','success');
-  }else{toast('Database offline.','error');btn.disabled=false;btn.textContent='Register Parcel →';return;}
-  document.getElementById('reg-tn').textContent=tn;
-  document.getElementById('reg-ok').style.display='block';
-  btn.disabled=false;btn.textContent='Register Parcel →';
-}
-function clearReg(){['sn','sp','se','sa','rn','rp','re','ra','pw','pd2','pe'].forEach(i=>sv(i,''));['po','pd'].forEach(i=>sv(i,''));document.getElementById('reg-ok').style.display='none';}
+/* ── REGISTER PARCEL ──────────────────────────────────────────────────── */
+async function registerParcel() {
+  const f = {
+    sn: v('sn'), sp: v('sp'), rn: v('rn'), rp: v('rp'),
+    po: v('po'), pd: v('pd'), pw: v('pw'), pd2: v('pd2')
+  };
 
-// ── UPDATE STATUS ─────────────────────────────────────────────────────────────
-async function findParcel(){
-  const num=v('u-inp').toUpperCase();if(!num){toast('Enter a tracking number.','error');return;}
-  const btn=document.getElementById('u-find');btn.disabled=true;btn.textContent='Searching…';
-  const{data,error}=await db.from('parcels').select('*').ilike('tracking_number',num).single();
-  btn.disabled=false;btn.textContent='Search';
-  if(error||!data){toast('Parcel not found.','error');return;}
-  fPId=data.id;
-  document.getElementById('u-ig').innerHTML=`<div class="ic"><label>Tracking #</label><p>${esc(data.tracking_number)}</p></div><div class="ic"><label>Sender</label><p>${esc(data.sender_name)}</p></div><div class="ic"><label>Receiver</label><p>${esc(data.receiver_name)}</p></div><div class="ic"><label>Route</label><p>${esc(data.origin_branch)} → ${esc(data.destination_branch)}</p></div><div class="ic"><label>Status</label><p><span class="sp ${sc(data.status)}">${esc(data.status)}</span></p></div>`;
-  document.getElementById('u-info').style.display='block';
-}
-async function doUpdate(){
-  if(!fPId)return;
-  const st=v('u-st'),loc=v('u-loc'),notes=v('u-notes');
-  const tracking=v('u-inp').toUpperCase();
-  const btn=document.getElementById('u-btn');btn.disabled=true;btn.textContent='Updating…';
-  const{error}=await db.from('parcels').update({status:st,updated_at:new Date().toISOString()}).eq('id',fPId);
-  if(error){toast('Error: '+error.message,'error');btn.disabled=false;btn.textContent='Update Status →';return;}
-  await db.from('parcel_history').insert({parcel_id:fPId,event:st,location:loc,status:st,notes:notes||null,created_at:new Date().toISOString()});
-  await audit('UPDATE_STATUS',tracking,'Status → '+st+' at '+loc+(notes?' — '+notes:''));
-  toast('Status updated to '+st,'success');clearUpd();
-  btn.disabled=false;btn.textContent='Update Status →';
-}
-function clearUpd(){fPId=null;sv('u-inp','');document.getElementById('u-info').style.display='none';sv('u-notes','');}
+  if (!f.sn || !f.sp || !f.rn || !f.rp || !f.po || !f.pd || !f.pw || !f.pd2) {
+    toast('Please fill in all required fields.', 'error'); return;
+  }
+  if (f.po === f.pd) { toast('Origin and destination cannot be the same.', 'error'); return; }
 
-// ── CONFIRM DELIVERY ──────────────────────────────────────────────────────────
-async function confirmDelivery(){
-  const tn=v('d-tn').toUpperCase(),rn=v('d-rn'),rp=v('d-rp'),cc=v('d-cc'),no=v('d-no');
-  if(!tn||!rn||!rp||!cc){toast('Please fill all required fields.','error');return;}
-  const btn=document.getElementById('d-btn');btn.disabled=true;btn.textContent='Confirming…';
-  const{data:p,error:fe}=await db.from('parcels').select('id').ilike('tracking_number',tn).single();
-  if(fe||!p){toast('Parcel not found.','error');btn.disabled=false;btn.textContent='Confirm Delivery →';return;}
-  await db.from('parcels').update({status:'Delivered',updated_at:new Date().toISOString()}).eq('id',p.id);
-  await db.from('parcel_history').insert({parcel_id:p.id,event:'Delivered',location:'Recipient',status:'Delivered',notes:'Received by '+rn+' ('+rp+')'+(no?'. '+no:''),created_at:new Date().toISOString()});
-  await db.from('deliveries').insert({parcel_id:p.id,tracking_number:tn,receiver_name:rn,receiver_phone:rp,confirmation_code:cc,delivery_notes:no||null,delivered_by:cUser?.email,delivered_at:new Date().toISOString()});
-  await audit('CONFIRM_DELIVERY',tn,'Delivered to '+rn+' ('+rp+')');
-  document.getElementById('d-ok-msg').textContent=tn+' marked as Delivered. Received by '+rn+'.';
-  document.getElementById('d-ok').style.display='block';
-  ['d-tn','d-rn','d-rp','d-cc','d-no'].forEach(i=>sv(i,''));
-  toast('Delivery confirmed!','success');btn.disabled=false;btn.textContent='Confirm Delivery →';
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const tn = genTN();
+  const rec = {
+    tracking_number: tn,
+    sender_name: f.sn, sender_phone: f.sp,
+    sender_email: v('se'), sender_address: v('sa'),
+    receiver_name: f.rn, receiver_phone: f.rp,
+    receiver_email: v('re'), receiver_address: v('ra'),
+    origin_branch: f.po, destination_branch: f.pd,
+    weight_kg: parseFloat(f.pw),
+    parcel_type: v('pt'),
+    parcel_description: f.pd2,
+    expected_delivery_date: v('pe') || null,
+    status: 'Registered',
+    registered_by: cUser?.email,
+    created_at: new Date().toISOString()
+  };
+
+  if (!dbOK) { toast('Database offline. Cannot register.', 'error'); btn.disabled = false; btn.textContent = 'Register Parcel →'; return; }
+
+  const { data, error } = await db.from('parcels').insert(rec).select().single();
+  if (error) { toast('DB Error: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Register Parcel →'; return; }
+
+  await db.from('parcel_history').insert({
+    parcel_id: data.id, event: 'Parcel Registered',
+    location: f.po, status: 'Registered',
+    notes: 'Registered by ' + (cUser?.email || 'staff'),
+    created_at: new Date().toISOString()
+  });
+
+  await audit('REGISTER_PARCEL', tn, 'Registered parcel for ' + f.sn + ' → ' + f.rn);
+  toast('Parcel registered successfully!', 'success');
+
+  document.getElementById('reg-tn').textContent = tn;
+  document.getElementById('reg-ok').style.display = 'block';
+  btn.disabled = false; btn.textContent = 'Register Parcel →';
 }
 
-// ── SEARCH ────────────────────────────────────────────────────────────────────
-async function doSearch(){
-  const q=v('sr-inp').toUpperCase();if(!q){toast('Enter a tracking number.','error');return;}
-  const{data}=await db.from('parcels').select('*').ilike('tracking_number','%'+q+'%').order('created_at',{ascending:false}).limit(20);
-  const rows=data&&data.length?data.map(p=>`<tr><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)">${esc(p.tracking_number)}</td><td>${esc(p.sender_name)}</td><td>${esc(p.receiver_name)}</td><td>${esc(p.destination_branch)}</td><td><span class="sp ${sc(p.status)}">${esc(p.status)}</span></td><td style="font-size:10px;font-family:'DM Mono',monospace">${fmtD(p.created_at)}</td></tr>`).join(''):`<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text-muted)">No results found</td></tr>`;
-  document.getElementById('sr-res').innerHTML=`<div class="tw"><table><thead><tr><th>Tracking #</th><th>Sender</th><th>Receiver</th><th>Destination</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+function clearReg() {
+  ['sn','sp','se','sa','rn','rp','re','ra','pw','pd2','pe'].forEach(i => sv(i, ''));
+  ['po','pd'].forEach(i => sv(i, ''));
+  document.getElementById('reg-ok').style.display = 'none';
 }
 
-// ── ENQUIRY ───────────────────────────────────────────────────────────────────
-async function submitEnquiry(){
-  const tn=v('eq-tn').toUpperCase(),ty=v('eq-ty'),nm=v('eq-nm'),ph=v('eq-ph'),em=v('eq-em'),ms=v('eq-ms');
-  if(!tn||!ty||!nm||!ph||!ms){toast('Please fill all required fields.','error');return;}
-  const btn=document.getElementById('eq-btn');btn.disabled=true;btn.textContent='Submitting…';
-  if(dbOK){const{error}=await db.from('enquiries').insert({tracking_number:tn,enquiry_type:ty,customer_name:nm,phone:ph,email:em||null,message:ms,status:'Open',created_at:new Date().toISOString()});if(error){toast('Submission failed: '+error.message,'error');btn.disabled=false;btn.textContent='Submit Enquiry →';return;}}
-  document.getElementById('eq-ok').style.display='block';
-  ['eq-tn','eq-nm','eq-ph','eq-em','eq-ms'].forEach(i=>sv(i,''));sv('eq-ty','');
-  toast('Enquiry submitted!','success');btn.disabled=false;btn.textContent='Submit Enquiry →';
+/* ── UPDATE STATUS ────────────────────────────────────────────────────── */
+async function findParcel() {
+  const num = v('u-inp').toUpperCase();
+  if (!num) { toast('Enter a tracking number.', 'error'); return; }
+
+  const btn = document.getElementById('u-find');
+  btn.disabled = true; btn.textContent = 'Searching…';
+
+  const { data, error } = await db.from('parcels').select('*').ilike('tracking_number', num).single();
+  btn.disabled = false; btn.textContent = 'Search';
+
+  if (error || !data) { toast('Parcel not found.', 'error'); return; }
+
+  fPId = data.id;
+  document.getElementById('u-ig').innerHTML = `
+    <div class="ic"><label>Tracking #</label><p>${esc(data.tracking_number)}</p></div>
+    <div class="ic"><label>Sender</label><p>${esc(data.sender_name)}</p></div>
+    <div class="ic"><label>Receiver</label><p>${esc(data.receiver_name)}</p></div>
+    <div class="ic"><label>Route</label><p>${esc(data.origin_branch)} → ${esc(data.destination_branch)}</p></div>
+    <div class="ic"><label>Current Status</label><p><span class="sp ${sc(data.status)}">${esc(data.status)}</span></p></div>`;
+  document.getElementById('u-info').style.display = 'block';
 }
 
-// ── STAFF DASH ────────────────────────────────────────────────────────────────
-async function loadSDash(){
-  if(!dbOK)return;
-  const today=new Date().toISOString().split('T')[0];
-  const[tr,ar]=await Promise.all([db.from('parcels').select('id',{count:'exact',head:true}).gte('created_at',today),db.from('parcels').select('status')]);
-  const all=ar.data||[];
-  document.getElementById('sd-td').textContent=tr.count||0;
-  document.getElementById('sd-tr').textContent=all.filter(p=>p.status==='In Transit').length;
-  document.getElementById('sd-dv').textContent=all.filter(p=>p.status==='Delivered').length;
-  document.getElementById('sd-ex').textContent=all.filter(p=>['Delayed','Lost','Returned'].includes(p.status)).length;
-  const{data:r}=await db.from('parcels').select('tracking_number,sender_name,destination_branch,status,updated_at,created_at').order('created_at',{ascending:false}).limit(8);
-  document.getElementById('sd-rows').innerHTML=r&&r.length?r.map(p=>`<tr><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)">${esc(p.tracking_number)}</td><td>${esc(p.sender_name)}</td><td>${esc(p.destination_branch)}</td><td><span class="sp ${sc(p.status)}">${esc(p.status)}</span></td><td style="font-size:10px;font-family:'DM Mono',monospace">${fmtD(p.updated_at||p.created_at)}</td></tr>`).join(''):`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted)">No parcels yet</td></tr>`;
+async function doUpdate() {
+  if (!fPId) return;
+  const st    = v('u-st');
+  const loc   = v('u-loc');
+  const notes = v('u-notes');
+  const track = v('u-inp').toUpperCase();
+
+  const btn = document.getElementById('u-btn');
+  btn.disabled = true; btn.textContent = 'Updating…';
+
+  const { error } = await db.from('parcels').update({ status: st, updated_at: new Date().toISOString() }).eq('id', fPId);
+  if (error) { toast('Error: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Update Status →'; return; }
+
+  await db.from('parcel_history').insert({
+    parcel_id: fPId, event: st, location: loc, status: st,
+    notes: notes || null, created_at: new Date().toISOString()
+  });
+
+  await audit('UPDATE_STATUS', track, 'Status → ' + st + ' at ' + loc + (notes ? ' — ' + notes : ''));
+  toast('Status updated to ' + st, 'success');
+  clearUpd();
+  btn.disabled = false; btn.textContent = 'Update Status →';
 }
 
-// ── ADMIN DASH ────────────────────────────────────────────────────────────────
-async function loadADash(){
-  if(!dbOK)return;
-  const[pr,er,sr]=await Promise.all([db.from('parcels').select('status'),db.from('enquiries').select('id',{count:'exact',head:true}),db.from('staff').select('id',{count:'exact',head:true})]);
-  const all=pr.data||[];
-  document.getElementById('ad-to').textContent=all.length;
-  document.getElementById('ad-de').textContent=all.filter(p=>p.status==='Delivered').length;
-  document.getElementById('ad-dl').textContent=all.filter(p=>p.status==='Delayed').length;
-  document.getElementById('ad-rt').textContent=all.filter(p=>p.status==='Returned').length;
-  document.getElementById('ad-eq').textContent=er.count||0;
-  document.getElementById('ad-st').textContent=sr.count||0;
-  const{data:logs}=await db.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(5);
-  document.getElementById('ad-log').innerHTML=logs&&logs.length?logs.map(l=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--cream)">${esc(l.action)}</span> — <span style="color:var(--text-muted)">${esc(l.user_email)}</span><br><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted)">${fmtDt(l.created_at)}</span></div>`).join(''):'<p style="color:var(--text-muted);font-size:12px">No activity yet.</p>';
+function clearUpd() {
+  fPId = null;
+  sv('u-inp', '');
+  document.getElementById('u-info').style.display = 'none';
+  sv('u-notes', '');
 }
 
-// ── ACCOUNTS ──────────────────────────────────────────────────────────────────
-async function loadAccounts(){
-  if(!dbOK)return;
-  const{data}=await db.from('staff').select('*').order('created_at',{ascending:false});
-  document.getElementById('ac-rows').innerHTML=data&&data.length?data.map(s=>`<tr><td style="color:var(--text)">${esc(s.full_name)}</td><td>${esc(s.email)}</td><td><span class="badge ${s.role==='Administrator'?'b-ad':'b-st'}">${esc(s.role)}</span></td><td>${esc(s.branch||'—')}</td><td><span class="badge ${s.status==='Active'?'b-act':'b-in'}">${esc(s.status||'Active')}</span></td><td><button class="btn btn-danger" onclick="toggleSt('${s.id}','${s.status}')">${s.status==='Active'?'Deactivate':'Activate'}</button></td></tr>`).join(''):`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No staff accounts</td></tr>`;
-}
-async function toggleSt(id,cur){
-  const ns=cur==='Active'?'Inactive':'Active';
-  const{error}=await db.from('staff').update({status:ns}).eq('id',id);
-  if(!error){toast('Account '+ns.toLowerCase(),'success');loadAccounts();}else toast('Error: '+error.message,'error');
-}
-async function createStaff(){
-  const n=v('cs-n'),e=v('cs-e').toLowerCase(),p=v('cs-p'),r=v('cs-r'),b=v('cs-b');
-  if(!n||!e||!p){toast('Fill all required fields.','error');return;}
-  if(p.length<6){toast('Password must be at least 6 characters.','error');return;}
-  const{error}=await db.from('staff').insert({full_name:n,email:e,password:p,role:r,branch:b,status:'Active',created_at:new Date().toISOString()});
-  if(error){toast('Error: '+error.message,'error');return;}
-  await audit('CREATE_STAFF',e,'Created '+r+' account for '+n);
-  toast('Staff account created!','success');closeModal('m-staff');loadAccounts();
-  ['cs-n','cs-e','cs-p'].forEach(i=>sv(i,''));
+/* ── CONFIRM DELIVERY ─────────────────────────────────────────────────── */
+async function confirmDelivery() {
+  const tn = v('d-tn').toUpperCase();
+  const rn = v('d-rn'), rp = v('d-rp'), cc = v('d-cc'), no = v('d-no');
+  if (!tn || !rn || !rp || !cc) { toast('Please fill all required fields.', 'error'); return; }
+
+  const btn = document.getElementById('d-btn');
+  btn.disabled = true; btn.textContent = 'Confirming…';
+
+  const { data: p, error: fe } = await db.from('parcels').select('id').ilike('tracking_number', tn).single();
+  if (fe || !p) { toast('Parcel not found.', 'error'); btn.disabled = false; btn.textContent = 'Confirm Delivery →'; return; }
+
+  await db.from('parcels').update({ status: 'Delivered', updated_at: new Date().toISOString() }).eq('id', p.id);
+  await db.from('parcel_history').insert({
+    parcel_id: p.id, event: 'Delivered', location: 'Recipient', status: 'Delivered',
+    notes: 'Received by ' + rn + ' (' + rp + ')' + (no ? '. ' + no : ''),
+    created_at: new Date().toISOString()
+  });
+  await db.from('deliveries').insert({
+    parcel_id: p.id, tracking_number: tn,
+    receiver_name: rn, receiver_phone: rp,
+    confirmation_code: cc, delivery_notes: no || null,
+    delivered_by: cUser?.email, delivered_at: new Date().toISOString()
+  });
+  await audit('CONFIRM_DELIVERY', tn, 'Delivered to ' + rn + ' (' + rp + ')');
+
+  document.getElementById('d-ok-msg').textContent = tn + ' has been marked as Delivered. Received by ' + rn + '.';
+  document.getElementById('d-ok').style.display = 'block';
+  ['d-tn','d-rn','d-rp','d-cc','d-no'].forEach(i => sv(i, ''));
+  toast('Delivery confirmed!', 'success');
+  btn.disabled = false; btn.textContent = 'Confirm Delivery →';
 }
 
-// ── ENQUIRIES ADMIN ───────────────────────────────────────────────────────────
-async function loadEnquiries(){
-  if(!dbOK)return;
-  const{data}=await db.from('enquiries').select('*').order('created_at',{ascending:false});
-  document.getElementById('eq-rows').innerHTML=data&&data.length?data.map(e=>`<tr><td style="font-size:10px;font-family:'DM Mono',monospace">${fmtD(e.created_at)}</td><td style="font-size:11px;color:var(--gold);font-family:'DM Mono',monospace">${esc(e.tracking_number)}</td><td>${esc(e.customer_name)}</td><td><span class="sp s-dl" style="font-size:9px">${esc(e.enquiry_type)}</span></td><td>${esc(e.phone)}</td><td style="max-width:200px;font-size:11px;color:var(--text-dim)">${esc(e.message)}</td></tr>`).join(''):`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No enquiries yet</td></tr>`;
+/* ── SEARCH ───────────────────────────────────────────────────────────── */
+async function doSearch() {
+  const q = v('sr-inp').toUpperCase();
+  if (!q) { toast('Enter a tracking number.', 'error'); return; }
+
+  const { data } = await db.from('parcels').select('*').ilike('tracking_number', '%' + q + '%').order('created_at', { ascending: false }).limit(20);
+
+  const rows = data && data.length
+    ? data.map(p => `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">${esc(p.tracking_number)}</td>
+        <td>${esc(p.sender_name)}</td>
+        <td>${esc(p.receiver_name)}</td>
+        <td>${esc(p.destination_branch)}</td>
+        <td><span class="sp ${sc(p.status)}">${esc(p.status)}</span></td>
+        <td style="font-size:11px;font-family:'DM Mono',monospace">${fmtD(p.created_at)}</td>
+      </tr>`).join('')
+    : emptyRow(6, 'No parcels found for that tracking number.', '🔍');
+
+  document.getElementById('sr-res').innerHTML = `<div class="tw">
+    <table>
+      <thead><tr><th>Tracking #</th><th>Sender</th><th>Receiver</th><th>Destination</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
 }
 
-// ── AUDIT LOGS ────────────────────────────────────────────────────────────────
-async function loadAudit(){
-  if(!dbOK)return;
-  const{data}=await db.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100);
-  document.getElementById('al-rows').innerHTML=data&&data.length?data.map(l=>`<tr><td style="font-size:10px;font-family:'DM Mono',monospace;white-space:nowrap">${fmtDt(l.created_at)}</td><td style="font-size:11px">${esc(l.user_email)}</td><td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--blue-l)">${esc(l.action)}</td><td style="font-size:10px;color:var(--gold);font-family:'DM Mono',monospace">${esc(l.record_affected||'—')}</td><td style="font-size:11px;color:var(--text-dim)">${esc(l.description||'—')}</td></tr>`).join(''):`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No audit logs yet</td></tr>`;
+/* ── ENQUIRY ──────────────────────────────────────────────────────────── */
+async function submitEnquiry() {
+  const tn = v('eq-tn').toUpperCase();
+  const ty = v('eq-ty'), nm = v('eq-nm'), ph = v('eq-ph'), em = v('eq-em'), ms = v('eq-ms');
+  if (!tn || !ty || !nm || !ph || !ms) { toast('Please fill all required fields.', 'error'); return; }
+
+  const btn = document.getElementById('eq-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  if (dbOK) {
+    const { error } = await db.from('enquiries').insert({
+      tracking_number: tn, enquiry_type: ty,
+      customer_name: nm, phone: ph, email: em || null, message: ms,
+      status: 'Open', created_at: new Date().toISOString()
+    });
+    if (error) { toast('Submission failed: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Submit Enquiry →'; return; }
+  }
+
+  document.getElementById('eq-ok').style.display = 'block';
+  ['eq-tn','eq-nm','eq-ph','eq-em','eq-ms'].forEach(i => sv(i, ''));
+  sv('eq-ty', '');
+  toast('Enquiry submitted!', 'success');
+  btn.disabled = false; btn.textContent = 'Submit Enquiry →';
 }
 
-// ── REPORTS ───────────────────────────────────────────────────────────────────
-async function genReport(){
-  const ty=v('rp-ty'),fr=v('rp-fr'),to=v('rp-to');
-  let q=db.from('parcels').select('tracking_number,sender_name,receiver_name,origin_branch,destination_branch,status,weight_kg,created_at');
-  if(fr)q=q.gte('created_at',fr);if(to)q=q.lte('created_at',to+'T23:59:59');
-  const{data}=await q.order('created_at',{ascending:false});
-  if(!data||!data.length){toast('No data for selected range.','warn');return;}
-  const res=document.getElementById('rp-res');res.style.display='block';
-  document.getElementById('rp-ttl').textContent=ty+(fr?' | '+fr+' to '+(to||'today'):'');
-  document.getElementById('rp-th').innerHTML='<tr><th>Tracking #</th><th>Sender</th><th>Receiver</th><th>Route</th><th>Status</th><th>Weight</th><th>Date</th></tr>';
-  document.getElementById('rp-tb').innerHTML=data.map(p=>`<tr><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)">${esc(p.tracking_number)}</td><td>${esc(p.sender_name)}</td><td>${esc(p.receiver_name)}</td><td style="font-size:11px">${esc(p.origin_branch)} → ${esc(p.destination_branch)}</td><td><span class="sp ${sc(p.status)}">${esc(p.status)}</span></td><td>${p.weight_kg||'—'} kg</td><td style="font-size:10px;font-family:'DM Mono',monospace">${fmtD(p.created_at)}</td></tr>`).join('');
-  await audit('GENERATE_REPORT',ty,'Report generated'+(fr?' from '+fr:''));
-}
-function exportCSV(){
-  const t=document.querySelector('#rp-res table');if(!t){toast('Generate a report first.','warn');return;}
-  let csv='';t.querySelectorAll('tr').forEach(r=>{csv+=[...r.querySelectorAll('th,td')].map(c=>'"'+c.textContent.replace(/"/g,'""')+'"').join(',')+'\n';});
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='botswanapost_report.csv';a.click();
+/* ── STAFF DASHBOARD ──────────────────────────────────────────────────── */
+async function loadSDash() {
+  if (!dbOK) return;
+  const today = new Date().toISOString().split('T')[0];
+  const [tr, ar] = await Promise.all([
+    db.from('parcels').select('id', { count: 'exact', head: true }).gte('created_at', today),
+    db.from('parcels').select('status')
+  ]);
+  const all = ar.data || [];
+  document.getElementById('sd-td').textContent = tr.count || 0;
+  document.getElementById('sd-tr').textContent = all.filter(p => p.status === 'In Transit').length;
+  document.getElementById('sd-dv').textContent = all.filter(p => p.status === 'Delivered').length;
+  document.getElementById('sd-ex').textContent = all.filter(p => ['Delayed','Lost','Returned'].includes(p.status)).length;
+
+  const { data: r } = await db.from('parcels').select('tracking_number,sender_name,destination_branch,status,updated_at,created_at').order('created_at', { ascending: false }).limit(8);
+  document.getElementById('sd-rows').innerHTML = r && r.length
+    ? r.map(p => `<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">${esc(p.tracking_number)}</td>
+        <td>${esc(p.sender_name)}</td>
+        <td>${esc(p.destination_branch)}</td>
+        <td><span class="sp ${sc(p.status)}">${esc(p.status)}</span></td>
+        <td style="font-size:11px;font-family:'DM Mono',monospace">${fmtD(p.updated_at || p.created_at)}</td>
+      </tr>`).join('')
+    : emptyRow(5, 'No parcels registered yet.', '📦');
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
-function v(id){return document.getElementById(id)?.value?.trim()||'';}
-function sv(id,val){const el=document.getElementById(id);if(el)el.value=val;}
+/* ── ADMIN DASHBOARD ──────────────────────────────────────────────────── */
+async function loadADash() {
+  if (!dbOK) return;
+  const [pr, er, sr] = await Promise.all([
+    db.from('parcels').select('status'),
+    db.from('enquiries').select('id', { count: 'exact', head: true }),
+    db.from('staff').select('id', { count: 'exact', head: true })
+  ]);
+  const all = pr.data || [];
+  document.getElementById('ad-to').textContent = all.length;
+  document.getElementById('ad-de').textContent = all.filter(p => p.status === 'Delivered').length;
+  document.getElementById('ad-dl').textContent = all.filter(p => p.status === 'Delayed').length;
+  document.getElementById('ad-rt').textContent = all.filter(p => p.status === 'Returned').length;
+  document.getElementById('ad-eq').textContent = er.count || 0;
+  document.getElementById('ad-st').textContent = sr.count || 0;
+
+  const { data: logs } = await db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(5);
+  document.getElementById('ad-log').innerHTML = logs && logs.length
+    ? logs.map(l => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.5">
+        <span style="color:var(--cream);font-weight:500">${esc(l.action)}</span>
+        <span style="color:var(--text-muted)"> — ${esc(l.user_email)}</span><br>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted)">${fmtDt(l.created_at)}</span>
+      </div>`).join('')
+    : '<p style="color:var(--text-muted);font-size:13px">No audit activity yet.</p>';
+}
+
+/* ── STAFF ACCOUNTS ───────────────────────────────────────────────────── */
+async function loadAccounts() {
+  if (!dbOK) return;
+  const { data } = await db.from('staff').select('*').order('created_at', { ascending: false });
+  document.getElementById('ac-rows').innerHTML = data && data.length
+    ? data.map(s => `<tr>
+        <td style="color:var(--text);font-weight:500">${esc(s.full_name)}</td>
+        <td style="font-size:12px">${esc(s.email)}</td>
+        <td><span class="badge ${s.role === 'Administrator' ? 'b-ad' : 'b-st'}">${esc(s.role)}</span></td>
+        <td>${esc(s.branch || '—')}</td>
+        <td><span class="badge ${s.status === 'Active' ? 'b-act' : 'b-in'}">${esc(s.status || 'Active')}</span></td>
+        <td><button class="btn btn-danger" onclick="toggleSt('${s.id}','${s.status}')" aria-label="${s.status === 'Active' ? 'Deactivate' : 'Activate'} ${s.full_name}'s account">${s.status === 'Active' ? 'Deactivate' : 'Activate'}</button></td>
+      </tr>`).join('')
+    : emptyRow(6, 'No staff accounts found.', '👥');
+}
+
+async function toggleSt(id, cur) {
+  const ns = cur === 'Active' ? 'Inactive' : 'Active';
+  const { error } = await db.from('staff').update({ status: ns }).eq('id', id);
+  if (!error) { toast('Account ' + ns.toLowerCase(), 'success'); loadAccounts(); }
+  else toast('Error: ' + error.message, 'error');
+}
+
+async function createStaff() {
+  const n = v('cs-n'), e = v('cs-e').toLowerCase(), p = v('cs-p'), r = v('cs-r'), b = v('cs-b');
+  if (!n || !e || !p) { toast('Fill all required fields.', 'error'); return; }
+  if (p.length < 6)   { toast('Password must be at least 6 characters.', 'error'); return; }
+
+  const { error } = await db.from('staff').insert({
+    full_name: n, email: e, password: p, role: r, branch: b,
+    status: 'Active', created_at: new Date().toISOString()
+  });
+
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  await audit('CREATE_STAFF', e, 'Created ' + r + ' account for ' + n);
+  toast('Staff account created!', 'success');
+  closeModal('m-staff');
+  loadAccounts();
+  ['cs-n','cs-e','cs-p'].forEach(i => sv(i, ''));
+}
+
+/* ── ENQUIRIES (ADMIN) ────────────────────────────────────────────────── */
+async function loadEnquiries() {
+  if (!dbOK) return;
+  const { data } = await db.from('enquiries').select('*').order('created_at', { ascending: false });
+  document.getElementById('eq-rows').innerHTML = data && data.length
+    ? data.map(e => `<tr>
+        <td style="font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap">${fmtD(e.created_at)}</td>
+        <td style="font-size:12px;color:var(--gold);font-family:'DM Mono',monospace">${esc(e.tracking_number)}</td>
+        <td>${esc(e.customer_name)}</td>
+        <td><span class="sp s-dl" style="font-size:10px">${esc(e.enquiry_type)}</span></td>
+        <td>${esc(e.phone)}</td>
+        <td style="max-width:220px;font-size:12px;color:var(--text-dim)">${esc(e.message)}</td>
+      </tr>`).join('')
+    : emptyRow(6, 'No enquiries submitted yet.', '✉️');
+}
+
+/* ── AUDIT LOGS ───────────────────────────────────────────────────────── */
+async function loadAudit() {
+  if (!dbOK) return;
+  const { data } = await db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100);
+  document.getElementById('al-rows').innerHTML = data && data.length
+    ? data.map(l => `<tr>
+        <td style="font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap">${fmtDt(l.created_at)}</td>
+        <td style="font-size:12px">${esc(l.user_email)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--blue-l)">${esc(l.action)}</td>
+        <td style="font-size:11px;color:var(--gold);font-family:'DM Mono',monospace">${esc(l.record_affected || '—')}</td>
+        <td style="font-size:12px;color:var(--text-dim)">${esc(l.description || '—')}</td>
+      </tr>`).join('')
+    : emptyRow(5, 'No audit log entries yet.', '🔍');
+}
+
+/* ── REPORTS ──────────────────────────────────────────────────────────── */
+async function genReport() {
+  const ty = v('rp-ty'), fr = v('rp-fr'), to = v('rp-to');
+  let q = db.from('parcels').select('tracking_number,sender_name,receiver_name,origin_branch,destination_branch,status,weight_kg,created_at');
+  if (fr) q = q.gte('created_at', fr);
+  if (to) q = q.lte('created_at', to + 'T23:59:59');
+  const { data } = await q.order('created_at', { ascending: false });
+
+  if (!data || !data.length) { toast('No data for the selected date range.', 'warn'); return; }
+
+  const res = document.getElementById('rp-res');
+  res.style.display = 'block';
+  document.getElementById('rp-ttl').textContent = ty + (fr ? ' | ' + fr + ' to ' + (to || 'today') : '');
+  document.getElementById('rp-th').innerHTML = '<tr><th>Tracking #</th><th>Sender</th><th>Receiver</th><th>Route</th><th>Status</th><th>Weight</th><th>Date</th></tr>';
+  document.getElementById('rp-tb').innerHTML = data.map(p => `<tr>
+    <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">${esc(p.tracking_number)}</td>
+    <td>${esc(p.sender_name)}</td>
+    <td>${esc(p.receiver_name)}</td>
+    <td style="font-size:12px">${esc(p.origin_branch)} → ${esc(p.destination_branch)}</td>
+    <td><span class="sp ${sc(p.status)}">${esc(p.status)}</span></td>
+    <td>${p.weight_kg || '—'} kg</td>
+    <td style="font-size:11px;font-family:'DM Mono',monospace">${fmtD(p.created_at)}</td>
+  </tr>`).join('');
+
+  await audit('GENERATE_REPORT', ty, 'Report generated' + (fr ? ' from ' + fr : ''));
+}
+
+function exportCSV() {
+  const table = document.querySelector('#rp-res table');
+  if (!table) { toast('Generate a report first.', 'warn'); return; }
+  let csv = '';
+  table.querySelectorAll('tr').forEach(row => {
+    csv += [...row.querySelectorAll('th,td')].map(c => '"' + c.textContent.replace(/"/g, '""') + '"').join(',') + '\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'botswanapost_report.csv';
+  a.click();
+}
 </script>
 </body>
 </html>
