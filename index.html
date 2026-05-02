@@ -879,6 +879,47 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
   .stat      { padding: 12px 8px; }
 }
 
+
+/* ── BREADCRUMBS ──────────────────────────────────────────────── */
+.bc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  margin-bottom: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.bc-link {
+  color: var(--blue-l);
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  background: none;
+  font-size: inherit;
+  padding: 0;
+  transition: color var(--t);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.bc-link:hover,
+.bc-link:focus-visible {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bc-sep {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  user-select: none;
+}
+
+.bc-cur {
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+}
+
 </style>
 </head>
 <body>
@@ -1004,7 +1045,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- TRACK ─────────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-track">
   <div class="pg-hdr">
-    <div class="bc"><span>Home</span> › <span>Track Parcel</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('home')" role="button" tabindex="0">Home</a> <span class="bc-sep">›</span> <span class="bc-cur">Track Parcel</span></div>
     <h1>Track Parcel</h1>
     <p>View current status and full movement history of any parcel</p>
   </div>
@@ -1111,7 +1152,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- REGISTER PARCEL ───────────────────────────────────────────────────────── -->
 <div class="page" id="page-register">
   <div class="pg-hdr">
-    <div class="bc"><span>Dashboard</span> › <span>Register Parcel</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('sdash')" role="button" tabindex="0">Dashboard</a> <span class="bc-sep">›</span> <span class="bc-cur">Register Parcel</span></div>
     <h1>Register New Parcel</h1>
     <p>Complete all required fields to generate a unique tracking number</p>
   </div>
@@ -1219,7 +1260,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- UPDATE STATUS ─────────────────────────────────────────────────────────── -->
 <div class="page" id="page-update">
   <div class="pg-hdr">
-    <div class="bc"><span>Dashboard</span> › <span>Update Parcel Status</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('sdash')" role="button" tabindex="0">Dashboard</a> <span class="bc-sep">›</span> <span class="bc-cur">Update Parcel Status</span></div>
     <h1>Update Parcel Status</h1>
     <p>Search for a parcel, then record a status change and location update</p>
   </div>
@@ -1278,7 +1319,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- CONFIRM DELIVERY ──────────────────────────────────────────────────────── -->
 <div class="page" id="page-delivery">
   <div class="pg-hdr">
-    <div class="bc"><span>Dashboard</span> › <span>Confirm Delivery</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('sdash')" role="button" tabindex="0">Dashboard</a> <span class="bc-sep">›</span> <span class="bc-cur">Confirm Delivery</span></div>
     <h1>Confirm Parcel Delivery</h1>
     <p>Record delivery confirmation with recipient details and confirmation code</p>
   </div>
@@ -1323,7 +1364,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- SEARCH ────────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-search">
   <div class="pg-hdr">
-    <div class="bc"><span>Dashboard</span> › <span>Search</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('sdash')" role="button" tabindex="0">Dashboard</a> <span class="bc-sep">›</span> <span class="bc-cur">Search Parcels</span></div>
     <h1>Search Parcels</h1>
     <p>Search by tracking number or part of a tracking number</p>
   </div>
@@ -1343,7 +1384,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- ENQUIRY (PUBLIC) ──────────────────────────────────────────────────────── -->
 <div class="page" id="page-enquiry">
   <div class="pg-hdr">
-    <div class="bc"><span>Home</span> › <span>Submit Enquiry</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('home')" role="button" tabindex="0">Home</a> <span class="bc-sep">›</span> <span class="bc-cur">Submit Enquiry</span></div>
     <h1>Customer Enquiry</h1>
     <p>Having an issue with your parcel? Submit an enquiry and our staff will assist you.</p>
   </div>
@@ -1505,7 +1546,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- STAFF ACCOUNTS ────────────────────────────────────────────────────────── -->
 <div class="page" id="page-accounts">
   <div class="pg-hdr">
-    <div class="bc"><span>Admin</span> › <span>Staff Accounts</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('adash')" role="button" tabindex="0">Admin</a> <span class="bc-sep">›</span> <span class="bc-cur">Staff Accounts</span></div>
     <h1>Staff Accounts</h1>
     <p>Manage staff and administrator accounts</p>
   </div>
@@ -1537,7 +1578,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- REPORTS ───────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-reports">
   <div class="pg-hdr">
-    <div class="bc"><span>Admin</span> › <span>Reports</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('adash')" role="button" tabindex="0">Admin</a> <span class="bc-sep">›</span> <span class="bc-cur">Reports</span></div>
     <h1>Reports</h1>
     <p>Generate and export parcel activity reports with date filters</p>
   </div>
@@ -1582,7 +1623,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- ENQUIRIES ADMIN ───────────────────────────────────────────────────────── -->
 <div class="page" id="page-enq-admin">
   <div class="pg-hdr">
-    <div class="bc"><span>Admin</span> › <span>Enquiries</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('adash')" role="button" tabindex="0">Admin</a> <span class="bc-sep">›</span> <span class="bc-cur">Enquiries</span></div>
     <h1>Customer Enquiries</h1>
     <p>Review all submitted customer enquiries</p>
   </div>
@@ -1610,7 +1651,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- AUDIT LOGS ────────────────────────────────────────────────────────────── -->
 <div class="page" id="page-audit">
   <div class="pg-hdr">
-    <div class="bc"><span>Admin</span> › <span>Audit Logs</span></div>
+    <div class="bc"><a class="bc-link" onclick="nav('adash')" role="button" tabindex="0">Admin</a> <span class="bc-sep">›</span> <span class="bc-cur">Audit Logs</span></div>
     <h1>Audit Logs</h1>
     <p>All staff and administrator actions are recorded here automatically</p>
   </div>
