@@ -1008,11 +1008,10 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
         <a onclick="doLogout()"        role="button" tabindex="0" class="nav-logout">🚪 Log out</a>
       </nav>
 
-      <!-- Logged-in user -->
+      <!-- Logged-in user — avatar + name only; logout is in the nav -->
       <div id="user-area" style="display:none" class="hdr-user">
         <div class="hdr-avatar" id="hdr-av" aria-hidden="true">?</div>
         <span class="hdr-name" id="hdr-nm"></span>
-        <button class="btn-logout" onclick="doLogout()" aria-label="Log out">Log out</button>
       </div>
 
       <!-- DB status -->
