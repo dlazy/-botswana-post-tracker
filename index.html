@@ -130,12 +130,14 @@ header {
 .hdr {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 clamp(16px,4vw,32px);
+  padding: 0 clamp(14px,4vw,32px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 64px;
-  gap: var(--sp-4);
+  min-height: 60px;
+  gap: var(--sp-3);
+  /* Never allow horizontal overflow */
+  overflow: hidden;
 }
 
 .logo {
@@ -677,22 +679,27 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 
 /* Mobile */
 @media (max-width: 680px) {
-  .hdr-nav    { display: none; }
-  .hdr-name   { display: none; }
-  .db-txt     { display: none; }
-  .hamburger  { display: flex; }
+  /* Kill ALL desktop navs — the mobile drawer handles everything */
+  .hdr-nav              { display: none !important; }
+  .hdr-name             { display: none; }
+  .db-txt               { display: none; }
+  .hamburger            { display: flex; }
 
-  .row { flex-direction: column; }
-  .fg  { grid-template-columns: 1fr; }
+  /* Keep right side tight: logo + db-dot + avatar + hamburger */
+  .hdr-right            { gap: 6px; overflow: visible; }
+  .hdr-user             { gap: 6px; }
+  .hdr-avatar           { width: 28px; height: 28px; font-size: 11px; }
+  .btn-logout           { display: none; } /* moved into drawer */
+
+  .row   { flex-direction: column; }
+  .fg    { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr 1fr; }
 
-  table { min-width: 320px; }
+  table  { min-width: 320px; }
   th, td { padding: 9px 11px; }
 
   .footer-inner { flex-direction: column; text-align: center; }
   .footer-links { justify-content: center; }
-
-  .hdr-user .hdr-name { display: none; }
 }
 
 /* Very small screens */
