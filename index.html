@@ -1043,7 +1043,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
     <a onclick="nav('reports');closeDrawer()" id="mob-rp"    class="admin-only" style="display:none">📈 Reports</a>
     <a onclick="nav('enq-admin');closeDrawer()"id="mob-eq"   class="admin-only" style="display:none">📋 Enquiries</a>
     <a onclick="nav('audit');closeDrawer()"   id="mob-aud"   class="admin-only" style="display:none">🔍 Audit Logs</a>
-    <a onclick="doLogout();closeDrawer()"     id="mob-out"   class="staff-only" style="display:none;color:#e06060">🚪 Log out</a>
+    <a onclick="doLogout();closeDrawer()"     id="mob-out"   class="mob-logout" style="display:none;color:#e06060">🚪 Log out</a>
   </nav>
 </header>
 
@@ -1855,6 +1855,8 @@ function updateMobileNav() {
   document.querySelectorAll('.staff-hidden').forEach(el => el.style.display = isStaff ? 'none' : '');
   document.querySelectorAll('.staff-only').forEach(el  => el.style.display = isStaff && !isAdmin ? '' : 'none');
   document.querySelectorAll('.admin-only').forEach(el  => el.style.display = isAdmin ? '' : 'none');
+  // Log out shows for any logged-in user (staff OR admin)
+  document.querySelectorAll('.mob-logout').forEach(el  => el.style.display = isStaff ? '' : 'none');
 }
 
 function onOut() {
