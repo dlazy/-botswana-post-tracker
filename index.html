@@ -689,8 +689,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
   .hdr-right            { gap: 6px; overflow: visible; }
   .hdr-user             { gap: 6px; }
   .hdr-avatar           { width: 28px; height: 28px; font-size: 11px; }
-  .btn-logout           { display: none; } /* moved into drawer */
-
+  
   .row   { flex-direction: column; }
   .fg    { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr 1fr; }
@@ -920,6 +919,41 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
   font-size: var(--fs-xs);
 }
 
+
+/* ── DESKTOP NAV — fluid wrap so all labels always show ────────
+   Uses a scrollable strip between ~680px and ~900px,
+   then wraps freely above 900px.                              */
+.hdr-nav {
+  display: flex;
+  gap: 2px;
+  flex-wrap: nowrap;           /* single line by default */
+  overflow-x: auto;            /* scroll if viewport is tight */
+  scrollbar-width: none;       /* hide scrollbar Chrome/FF */
+  -ms-overflow-style: none;
+  max-width: calc(100vw - 280px); /* leave room for logo + user area */
+}
+.hdr-nav::-webkit-scrollbar { display: none; }
+
+.hdr-nav a {
+  font-size: clamp(11px, 1.3vw, 13px); /* shrinks on narrower screens */
+  color: var(--text-dim);
+  padding: 6px clamp(8px, 1.2vw, 13px);
+  border-radius: var(--rs);
+  cursor: pointer;
+  transition: all var(--t);
+  text-decoration: none;
+  border: none;
+  background: none;
+  white-space: nowrap;         /* never break a label mid-word */
+}
+.hdr-nav a:hover { color: var(--text); background: var(--c-raised); }
+.hdr-nav a.cur  { color: var(--gold); background: rgba(200,153,26,0.1); }
+
+/* At ≥1100px give full comfortable padding back */
+@media (min-width: 1100px) {
+  .hdr-nav a { font-size: 13px; padding: 6px 13px; }
+}
+
 </style>
 </head>
 <body>
@@ -946,14 +980,14 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
       </nav>
       <nav class="hdr-nav" id="staff-nav" style="display:none" aria-label="Staff navigation">
         <a onclick="nav('sdash')"    role="button" tabindex="0">📊 Dashboard</a>
-        <a onclick="nav('register')" role="button" tabindex="0">➕ Register</a>
-        <a onclick="nav('update')"   role="button" tabindex="0">🔄 Update</a>
-        <a onclick="nav('delivery')" role="button" tabindex="0">✅ Delivery</a>
+        <a onclick="nav('register')" role="button" tabindex="0">➕ Register Parcel</a>
+        <a onclick="nav('update')"   role="button" tabindex="0">🔄 Update Status</a>
+        <a onclick="nav('delivery')" role="button" tabindex="0">✅ Confirm Delivery</a>
         <a onclick="nav('search')"   role="button" tabindex="0">🔍 Search</a>
       </nav>
       <nav class="hdr-nav" id="admin-nav" style="display:none" aria-label="Admin navigation">
         <a onclick="nav('adash')"      role="button" tabindex="0">📊 Dashboard</a>
-        <a onclick="nav('accounts')"   role="button" tabindex="0">👥 Accounts</a>
+        <a onclick="nav('accounts')"   role="button" tabindex="0">👥 Staff Accounts</a>
         <a onclick="nav('reports')"    role="button" tabindex="0">📈 Reports</a>
         <a onclick="nav('enq-admin')"  role="button" tabindex="0">📋 Enquiries</a>
         <a onclick="nav('audit')"      role="button" tabindex="0">🔍 Audit Logs</a>
