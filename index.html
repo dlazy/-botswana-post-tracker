@@ -715,6 +715,170 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
   .hdr-nav a, .mobile-drawer a, .btn, select.inp { min-height: 44px; }
   .btn-danger { min-height: 40px; }
 }
+
+/* ── ADMIN DASHBOARD ──────────────────────────────────────────
+   Mobile-first: single column → two column on wider screens
+───────────────────────────────────────────────────────────────*/
+
+/* Stat grid — 3 cols mobile, 6 cols desktop */
+.ad-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 2vw, 12px);
+  margin-bottom: clamp(16px, 3vw, 24px);
+}
+
+/* Clickable stat card */
+.stat-link {
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(200,153,26,0);
+  transition: background var(--t);
+  border-radius: var(--r);
+}
+
+.stat-link:hover::after,
+.stat-link:focus-visible::after {
+  background: rgba(200,153,26,0.06);
+}
+
+.stat-link:hover  { transform: translateY(-2px); border-color: rgba(200,153,26,0.35); }
+.stat-link:active { transform: translateY(0); }
+
+/* Widen to 6 columns on larger screens */
+@media (min-width: 560px) {
+  .ad-stats { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* ── ADMIN GRID — stacks on mobile ─────────────────────────── */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(12px, 2vw, 16px);
+}
+
+@media (min-width: 720px) {
+  .admin-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── ACTION LINKS — list of nav items ────────────────────────── */
+.ad-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: -4px; /* bleed into card padding */
+}
+
+.ad-action-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: var(--rs);
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  background: none;
+  transition: background var(--t), transform var(--t);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 56px; /* generous touch target */
+}
+
+.ad-action-link:hover,
+.ad-action-link:focus-visible {
+  background: var(--c-raised);
+}
+
+.ad-action-link:active { transform: scale(0.98); }
+
+.ad-action-icon {
+  font-size: clamp(20px, 3.5vw, 24px);
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+  line-height: 1;
+}
+
+.ad-action-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ad-action-text strong {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-action-text small {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-action-arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color var(--t), transform var(--t);
+}
+
+.ad-action-link:hover .ad-action-arrow {
+  color: var(--gold);
+  transform: translateX(3px);
+}
+
+/* Dividers between action rows */
+.ad-action-link + .ad-action-link {
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+.ad-action-link:first-child { border-radius: var(--rs) var(--rs) 0 0; }
+.ad-action-link:last-child  { border-radius: 0 0 var(--rs) var(--rs); }
+
+/* ── SEE ALL LINK ─────────────────────────────────────────────── */
+.ad-see-all {
+  font-size: var(--fs-xs);
+  color: var(--gold);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--rx);
+  transition: background var(--t);
+  white-space: nowrap;
+}
+.ad-see-all:hover { background: rgba(200,153,26,0.1); }
+
+/* ── STAT CARD size — slightly smaller on mobile so 3 fit ────── */
+@media (max-width: 480px) {
+  .stat-icon { font-size: 18px; }
+  .stat-n    { font-size: clamp(18px, 5vw, 26px); }
+  .stat-l    { font-size: 9px; letter-spacing: 0; }
+  .ad-stats  { gap: 6px; }
+  .stat      { padding: 12px 8px; }
+}
+
 </style>
 </head>
 <body>
@@ -1235,29 +1399,106 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
     <h1>Administrator Dashboard</h1>
     <p>System overview — all parcels, staff, and activity</p>
   </div>
-  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
-    <div class="stat"><span class="stat-icon">📦</span><div class="stat-n" id="ad-to">—</div><div class="stat-l">Total Parcels</div></div>
-    <div class="stat"><span class="stat-icon">✅</span><div class="stat-n" id="ad-de">—</div><div class="stat-l">Delivered</div></div>
-    <div class="stat"><span class="stat-icon">⏱</span><div class="stat-n" id="ad-dl">—</div><div class="stat-l">Delayed</div></div>
-    <div class="stat"><span class="stat-icon">↩️</span><div class="stat-n" id="ad-rt">—</div><div class="stat-l">Returned</div></div>
-    <div class="stat"><span class="stat-icon">✉️</span><div class="stat-n" id="ad-eq">—</div><div class="stat-l">Enquiries</div></div>
-    <div class="stat"><span class="stat-icon">👥</span><div class="stat-n" id="ad-st">—</div><div class="stat-l">Staff Accounts</div></div>
+
+  <!-- Stat cards — clickable links to relevant sections -->
+  <div class="ad-stats" role="region" aria-label="System statistics">
+    <a class="stat stat-link" onclick="nav('search')" role="button" tabindex="0">
+      <span class="stat-icon" aria-hidden="true">📦</span>
+      <div class="stat-n" id="ad-to">—</div>
+      <div class="stat-l">Total Parcels</div>
+    </a>
+    <a class="stat stat-link" onclick="nav('search')" role="button" tabindex="0">
+      <span class="stat-icon" aria-hidden="true">✅</span>
+      <div class="stat-n" id="ad-de">—</div>
+      <div class="stat-l">Delivered</div>
+    </a>
+    <a class="stat stat-link" onclick="nav('search')" role="button" tabindex="0">
+      <span class="stat-icon" aria-hidden="true">⏱</span>
+      <div class="stat-n" id="ad-dl">—</div>
+      <div class="stat-l">Delayed</div>
+    </a>
+    <a class="stat stat-link" onclick="nav('search')" role="button" tabindex="0">
+      <span class="stat-icon" aria-hidden="true">↩️</span>
+      <div class="stat-n" id="ad-rt">—</div>
+      <div class="stat-l">Returned</div>
+    </a>
+    <a class="stat stat-link" onclick="nav('enq-admin')" role="button" tabindex="0">
+      <span class="stat-icon" aria-hidden="true">✉️</span>
+      <div class="stat-n" id="ad-eq">—</div>
+      <div class="stat-l">Enquiries</div>
+    </a>
+    <a class="stat stat-link" onclick="nav('accounts')" role="button" tabindex="0">
+      <span class="stat-icon" aria-hidden="true">👥</span>
+      <div class="stat-n" id="ad-st">—</div>
+      <div class="stat-l">Staff Accounts</div>
+    </a>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="admin-grid">
+  <!-- Quick Actions + Recent Activity — stack on mobile -->
+  <div class="admin-grid">
+
     <div class="card">
       <div class="card-title">Quick Actions</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-ghost btn-sm" onclick="nav('accounts')" style="justify-content:flex-start">👥 Manage Staff Accounts</button>
-        <button class="btn btn-ghost btn-sm" onclick="nav('reports')"  style="justify-content:flex-start">📊 Generate Reports</button>
-        <button class="btn btn-ghost btn-sm" onclick="nav('enq-admin')"style="justify-content:flex-start">📋 View Enquiries</button>
-        <button class="btn btn-ghost btn-sm" onclick="nav('audit')"    style="justify-content:flex-start">🔍 Audit Logs</button>
-      </div>
+      <nav class="ad-actions" aria-label="Admin quick actions">
+        <a class="ad-action-link" onclick="nav('accounts')" role="button" tabindex="0">
+          <span class="ad-action-icon">👥</span>
+          <span class="ad-action-text">
+            <strong>Staff Accounts</strong>
+            <small>Create, view &amp; manage users</small>
+          </span>
+          <span class="ad-action-arrow">›</span>
+        </a>
+        <a class="ad-action-link" onclick="nav('reports')" role="button" tabindex="0">
+          <span class="ad-action-icon">📊</span>
+          <span class="ad-action-text">
+            <strong>Reports</strong>
+            <small>Generate &amp; export data</small>
+          </span>
+          <span class="ad-action-arrow">›</span>
+        </a>
+        <a class="ad-action-link" onclick="nav('enq-admin')" role="button" tabindex="0">
+          <span class="ad-action-icon">📋</span>
+          <span class="ad-action-text">
+            <strong>Enquiries</strong>
+            <small>Review customer submissions</small>
+          </span>
+          <span class="ad-action-arrow">›</span>
+        </a>
+        <a class="ad-action-link" onclick="nav('audit')" role="button" tabindex="0">
+          <span class="ad-action-icon">🔍</span>
+          <span class="ad-action-text">
+            <strong>Audit Logs</strong>
+            <small>All recorded staff actions</small>
+          </span>
+          <span class="ad-action-arrow">›</span>
+        </a>
+        <a class="ad-action-link" onclick="nav('search')" role="button" tabindex="0">
+          <span class="ad-action-icon">📦</span>
+          <span class="ad-action-text">
+            <strong>Search Parcels</strong>
+            <small>Find any parcel by tracking #</small>
+          </span>
+          <span class="ad-action-arrow">›</span>
+        </a>
+        <a class="ad-action-link" onclick="nav('register')" role="button" tabindex="0">
+          <span class="ad-action-icon">➕</span>
+          <span class="ad-action-text">
+            <strong>Register Parcel</strong>
+            <small>Add a new parcel to the system</small>
+          </span>
+          <span class="ad-action-arrow">›</span>
+        </a>
+      </nav>
     </div>
+
     <div class="card">
-      <div class="card-title">Recent Audit Activity</div>
+      <div class="card-hdr">
+        <div class="card-title" style="margin-bottom:0">Recent Audit Activity</div>
+        <a class="ad-see-all" onclick="nav('audit')" role="button" tabindex="0">See all ›</a>
+      </div>
       <div id="ad-log" style="font-size:13px;color:var(--text-dim)">Loading…</div>
     </div>
+
   </div>
 </div>
 
