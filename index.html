@@ -967,6 +967,103 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
   background: rgba(184,48,48,0.1);
 }
 
+
+/* ── APP DOWNLOAD BANNER ─────────────────────────────────────── */
+.app-banner {
+  max-width: 620px;
+  margin: clamp(20px,3vw,28px) auto 0;
+  background: linear-gradient(135deg, var(--c-raised), var(--c-lift));
+  border: 1px solid var(--border-s);
+  border-radius: var(--r);
+  padding: clamp(14px,3vw,20px) clamp(16px,3vw,24px);
+  display: flex;
+  align-items: center;
+  gap: clamp(12px,2vw,18px);
+  flex-wrap: wrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+}
+
+.app-banner-icon {
+  font-size: clamp(28px,5vw,36px);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.app-banner-text {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.app-banner-text strong {
+  font-size: var(--fs-md);
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.app-banner-text span {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+
+.app-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold);
+  color: var(--c-base);
+  border-radius: var(--rs);
+  padding: 11px 20px;
+  text-decoration: none;
+  transition: all var(--t);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 52px;
+}
+
+.app-download-btn:hover {
+  background: var(--gold-l);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(200,153,26,0.35);
+}
+
+.app-download-btn:active { transform: translateY(0); }
+
+.app-dl-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.app-dl-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+}
+
+.app-dl-text small {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.app-dl-text strong {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+/* Full-width button on very small screens */
+@media (max-width: 400px) {
+  .app-banner      { flex-direction: column; text-align: center; }
+  .app-banner-text { align-items: center; }
+  .app-download-btn { width: 100%; justify-content: center; }
+}
+
 </style>
 </head>
 <body>
@@ -1087,6 +1184,27 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
     <p style="margin-top:14px;font-size:13px;color:var(--text-muted)">
       Customers can track parcels without logging in.
     </p>
+  </div>
+
+  <!-- Android App Download Banner -->
+  <div class="app-banner" role="region" aria-label="Download mobile app">
+    <div class="app-banner-icon" aria-hidden="true">📱</div>
+    <div class="app-banner-text">
+      <strong>BotswanaPost Mobile App</strong>
+      <span>Track parcels on the go — available for Android</span>
+    </div>
+    <a
+      href="./BotswanaPost_Parcel_Tracking.apk"
+      download="BotswanaPost_Parcel_Tracking.apk"
+      class="app-download-btn"
+      aria-label="Download BotswanaPost Android app"
+    >
+      <span class="app-dl-icon" aria-hidden="true">⬇</span>
+      <span class="app-dl-text">
+        <small>Download for</small>
+        <strong>Android (.apk)</strong>
+      </span>
+    </a>
   </div>
 </div>
 
@@ -1728,11 +1846,12 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
 <!-- ═══ FOOTER ════════════════════════════════════════════════════════════════ -->
 <footer>
   <div class="footer-inner">
-    <span class="footer-copy">© 2026 BotswanaPost · Parcel Tracking & Management System</span>
+    <span class="footer-copy">© 2026 BotswanaPost · Parcel Tracking &amp; Management System</span>
     <div class="footer-links">
       <a onclick="nav('track')">Track Parcel</a>
       <a onclick="nav('enquiry')">Submit Enquiry</a>
       <a onclick="nav('login')">Staff Login</a>
+      <a href="./BotswanaPost_Parcel_Tracking.apk" download="BotswanaPost_Parcel_Tracking.apk" style="color:var(--gold);font-weight:500">⬇ Android App</a>
     </div>
   </div>
 </footer>
