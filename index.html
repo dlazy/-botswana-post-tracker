@@ -954,6 +954,19 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
   .hdr-nav a { font-size: 13px; padding: 6px 13px; }
 }
 
+
+/* Log out nav link — distinct red tint to signal destructive action */
+.hdr-nav a.nav-logout {
+  color: var(--text-muted);
+  border-left: 1px solid var(--border);
+  margin-left: 4px;
+  padding-left: clamp(10px, 1.5vw, 16px);
+}
+.hdr-nav a.nav-logout:hover {
+  color: #d86060;
+  background: rgba(184,48,48,0.1);
+}
+
 </style>
 </head>
 <body>
@@ -984,6 +997,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
         <a onclick="nav('update')"   role="button" tabindex="0">🔄 Update Status</a>
         <a onclick="nav('delivery')" role="button" tabindex="0">✅ Confirm Delivery</a>
         <a onclick="nav('search')"   role="button" tabindex="0">🔍 Search</a>
+        <a onclick="doLogout()"      role="button" tabindex="0" class="nav-logout">🚪 Log out</a>
       </nav>
       <nav class="hdr-nav" id="admin-nav" style="display:none" aria-label="Admin navigation">
         <a onclick="nav('adash')"      role="button" tabindex="0">📊 Dashboard</a>
@@ -991,6 +1005,7 @@ footer { background:var(--c-surface); border-top:1px solid var(--border); paddin
         <a onclick="nav('reports')"    role="button" tabindex="0">📈 Reports</a>
         <a onclick="nav('enq-admin')"  role="button" tabindex="0">📋 Enquiries</a>
         <a onclick="nav('audit')"      role="button" tabindex="0">🔍 Audit Logs</a>
+        <a onclick="doLogout()"        role="button" tabindex="0" class="nav-logout">🚪 Log out</a>
       </nav>
 
       <!-- Logged-in user -->
